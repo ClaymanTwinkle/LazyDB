@@ -24,8 +24,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static android.R.id.list;
-
 public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.toolbar)
@@ -44,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         initView();
-        mLazyDB=LazyDB.create(getApplicationContext());
+        mLazyDB = LazyDB.create(getApplicationContext());
         loadData();
     }
 
@@ -57,6 +55,10 @@ public class MainActivity extends AppCompatActivity {
                     adapter.clearAll();
                     loadData();
                     break;
+                case EditTagActivity.REQUEST_CODE:
+                    int position=data.getIntExtra(EditTagActivity.Extra_Position,0);
+                    adapter.notifyItemChanged(position);
+                    break;
             }
         }
     }
@@ -68,11 +70,21 @@ public class MainActivity extends AppCompatActivity {
         adapter = new TagAdapter();
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        adapter.setOnItemClickListener(new TagAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position, View view) {
+                Intent intent = new Intent(getApplicationContext(), EditTagActivity.class);
+                intent.putExtra(Tag.class.getName(), adapter.getItem(position));
+                intent.putExtra(EditTagActivity.Extra_Position,position);
+                startActivityForResult(intent, EditTagActivity.REQUEST_CODE);
+            }
+        });
     }
 
     private void loadData() {
         try {
             List<Tag> tagList = mLazyDB.query(Tag.class).selectAll().execute();
+            System.err.println(tagList);
             adapter.addAll(tagList);
             adapter.notifyDataSetChanged();
         } catch (InstantiationException | ParseException | IllegalAccessException | NoSuchFieldException e) {
@@ -85,8 +97,9 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(new Intent(getApplicationContext(), AddTagActivity.class), AddTagActivity.REQUEST_CODE);
     }
 
-    class TagAdapter extends RecyclerView.Adapter<CommonViewHolder> {
+    static class TagAdapter extends RecyclerView.Adapter<CommonViewHolder> {
 
+        private OnItemClickListener mOnItemClickListener;
         private List<Tag> data = new ArrayList<>();
 
         public TagAdapter() {
@@ -104,23 +117,43 @@ public class MainActivity extends AppCompatActivity {
             this.data.clear();
         }
 
+        public Tag getItem(int position) {
+            return data.get(position);
+        }
+
         @Override
         public CommonViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             return new CommonViewHolder(View.inflate(parent.getContext(), R.layout.list_item_tag, null));
         }
 
         @Override
-        public void onBindViewHolder(CommonViewHolder holder, int position) {
+        public void onBindViewHolder(CommonViewHolder holder, final int position) {
             Tag tag = data.get(position);
             TextView tvTime = holder.getView(R.id.tvTime);
             TextView tvText = holder.getView(R.id.tvText);
             tvText.setText(tag.getText());
             tvTime.setText(tag.getTime());
+            if (mOnItemClickListener != null) {
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mOnItemClickListener.onItemClick(position, v);
+                    }
+                });
+            }
         }
 
         @Override
         public int getItemCount() {
             return data.size();
+        }
+
+        public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+            mOnItemClickListener = onItemClickListener;
+        }
+
+        public static interface OnItemClickListener {
+            void onItemClick(int position, View view);
         }
     }
 }

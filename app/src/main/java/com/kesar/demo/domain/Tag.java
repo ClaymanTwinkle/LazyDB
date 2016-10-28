@@ -2,11 +2,13 @@ package com.kesar.demo.domain;
 
 import org.kesar.lazy.lazydb.annotate.ID;
 
+import java.io.Serializable;
+
 /**
  * 标签bean
  * Created by kesar on 16-10-28.
  */
-public class Tag {
+public class Tag implements Serializable{
     @ID
     private String id;
     private String text;

@@ -20,6 +20,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".AddTagActivity" android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".EditTagActivity" android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

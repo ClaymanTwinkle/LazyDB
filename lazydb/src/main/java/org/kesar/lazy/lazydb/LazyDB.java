@@ -83,6 +83,7 @@ public final class LazyDB {
 
     /**
      * 从表中查找出所有字段名
+     *
      * @param clazz class
      * @return 字段列表
      * @throws NoSuchFieldException
@@ -128,7 +129,7 @@ public final class LazyDB {
      *
      * @return 所有表名的集合；若没有表，则是空集合
      */
-    public List<String> selectAllTableNames() {
+    public List<String> queryAllTableNames() {
         List<String> tableNames = new ArrayList<>();
 
         SQLiteDatabase db = helper.getReadableDatabase();
