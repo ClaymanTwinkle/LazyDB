@@ -73,13 +73,7 @@ public class MainActivity extends AppCompatActivity {
             List<Tag> tagList = mLazyDB.query(Tag.class).selectAll().execute();
             adapter.addAll(tagList);
             adapter.notifyDataSetChanged();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+        } catch (InstantiationException | ParseException | IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
     }

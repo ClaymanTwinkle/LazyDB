@@ -14,6 +14,7 @@ import com.kesar.demo.domain.Tag;
 
 import org.kesar.lazy.lazydb.LazyDB;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import butterknife.BindView;
@@ -57,7 +58,7 @@ public class AddTagActivity extends AppCompatActivity {
                 if (!TextUtils.isEmpty(text)) {
                     Tag tag = new Tag();
                     tag.setText(text);
-                    tag.setTime(new Date().toLocaleString());
+                    tag.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
                     try {
                         LazyDB lazyDB = LazyDB.create(getApplicationContext());
                         lazyDB.insert(tag);
