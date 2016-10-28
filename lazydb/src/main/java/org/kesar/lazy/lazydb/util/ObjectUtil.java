@@ -10,8 +10,7 @@ import java.util.Date;
  * 对象工具类
  * Created by kesar on 2016/6/25 0025.
  */
-public final class ObjectUtil
-{
+public final class ObjectUtil {
     /**
      * 构建 对象，class实例化对象，游标获取数据填充对象
      *
@@ -23,76 +22,53 @@ public final class ObjectUtil
      * @throws NoSuchFieldException
      * @throws ParseException
      */
-    public static <T> T buildObject(Class<T> objectClass, Cursor cursor) throws InstantiationException, IllegalAccessException, NoSuchFieldException, ParseException
-    {
+    public static <T> T buildObject(Class<T> objectClass, Cursor cursor) throws InstantiationException, IllegalAccessException, NoSuchFieldException, ParseException {
         T object = ReflectUtil.newInstance(objectClass);
         int columnCount = cursor.getColumnCount();
-        for (int i = 0; i < columnCount; i++)
-        {
+        for (int i = 0; i < columnCount; i++) {
+            if (cursor.isNull(i)) {
+                continue;
+            }
             String columnName = cursor.getColumnName(i);
             Field field = objectClass.getDeclaredField(columnName);
-            if (field == null)
-            {
+            if (field == null) {
                 continue;
             }
             Class fieldClass = field.getType();
             field.setAccessible(true);
 
-            if (fieldClass == String.class)
-            {
+            if (fieldClass == String.class) {
                 field.set(object, cursor.getString(i));
-            }
-            else if (fieldClass == double.class
-                    || fieldClass == Double.class)
-            {
+            } else if (fieldClass == double.class
+                    || fieldClass == Double.class) {
                 field.setDouble(object, cursor.getDouble(i));
-            }
-            else if (fieldClass == float.class
-                    || fieldClass == Float.class)
-            {
+            } else if (fieldClass == float.class
+                    || fieldClass == Float.class) {
                 field.setFloat(object, cursor.getFloat(i));
-            }
-            else if (fieldClass == Long.class
-                    || fieldClass == long.class)
-            {
+            } else if (fieldClass == Long.class
+                    || fieldClass == long.class) {
                 field.setLong(object, cursor.getLong(i));
-            }
-            else if (fieldClass == Integer.class
-                    || fieldClass == int.class)
-            {
+            } else if (fieldClass == Integer.class
+                    || fieldClass == int.class) {
                 field.setInt(object, cursor.getInt(i));
-            }
-            else if (fieldClass == byte.class
-                    || fieldClass == Byte.class)
-            {
+            } else if (fieldClass == byte.class
+                    || fieldClass == Byte.class) {
                 String value = cursor.getString(i);
                 field.setByte(object, Byte.parseByte(value));
-            }
-            else if (fieldClass == Short.class
-                    || fieldClass == short.class)
-            {
+            } else if (fieldClass == Short.class
+                    || fieldClass == short.class) {
                 short value = cursor.getShort(i);
                 field.setShort(object, value);
-            }
-            else if (fieldClass == byte[].class)
-            {
+            } else if (fieldClass == byte[].class) {
                 byte[] value = cursor.getBlob(i);
                 field.set(object, value);
-            }
-            else if (fieldClass == Boolean.class
-                    || fieldClass == boolean.class)
-            {
+            } else if (fieldClass == Boolean.class
+                    || fieldClass == boolean.class) {
                 int value = cursor.getInt(i);
                 field.setBoolean(object, value != 0);
-            }
-            else if (fieldClass == Date.class)
-            {
+            } else if (fieldClass == Date.class) {
                 String value = cursor.getString(i);
                 field.set(object, DateUtil.string2Date(value));
-            }
-            else
-            {
-                // TODO: 2016/6/22 0022 其他数据类型处理
             }
         }
         return object;
