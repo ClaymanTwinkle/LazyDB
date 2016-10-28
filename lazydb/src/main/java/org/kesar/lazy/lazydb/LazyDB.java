@@ -109,15 +109,6 @@ public final class LazyDB {
     }
 
     /**
-     * 调整Class对应的表
-     *
-     * @param clazz 类
-     */
-    public void adjustTable(Class<?> clazz) {
-        // TODO: 2016/10/28 0028
-    }
-
-    /**
      * 创建表
      *
      * @param tableName       表名
