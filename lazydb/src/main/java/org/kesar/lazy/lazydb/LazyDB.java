@@ -24,6 +24,12 @@ import java.util.List;
  */
 public final class LazyDB
 {
+    /**
+     * 阻止通过new来实例化LazyDB
+     * 应该使用create方法来创建LazyDB
+     */
+    private LazyDB(){}
+
     private SqliteDBHelper helper;
 
     /**

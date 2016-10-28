@@ -3,7 +3,6 @@ package com.kesar.demo;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,8 +14,10 @@ import android.widget.TextView;
 import com.kesar.demo.adapter.CommonViewHolder;
 import com.kesar.demo.domain.Tag;
 
+import org.kesar.lazy.lazydb.LazyDB;
+
+import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     FloatingActionButton fab;
 
     private TagAdapter adapter;
+    private LazyDB mLazyDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,28 +42,51 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         initView();
+        mLazyDB=LazyDB.create(getApplicationContext());
+        loadData();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case AddTagActivity.REQUEST_CODE:
+                    adapter.clearAll();
+                    loadData();
+                    break;
+            }
+        }
     }
 
     private void initView() {
         // toolbar
         setSupportActionBar(toolbar);
         // TagAdapter
-        List<Tag> tagList=new ArrayList<>();
-        for(int i=0;i<100;i++){
-            Tag tag=new Tag();
-            tag.setText(" 萨拉；反击的；拉萨发觉了；三大件发牢骚激发了；阿三及；了房间示范基地打；烧烤架非；拉丝机非；阿三激发了的会计师法律及哦舞台剧上帝给了据哇哦特钢哈市了；记得给非感到十分各地市该发生发射的公司更是反倒是根深蒂固发射的根深蒂固撒");
-            tag.setTime(new Date().toLocaleString());
-            tagList.add(tag);
-        }
-        adapter = new TagAdapter(tagList);
+        adapter = new TagAdapter();
         recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new GridLayoutManager(this,2));
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+    }
 
+    private void loadData() {
+        try {
+            List<Tag> tagList = mLazyDB.query(Tag.class).selectAll().execute();
+            adapter.addAll(tagList);
+            adapter.notifyDataSetChanged();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     @OnClick(R.id.fab)
     public void onClick(View view) {
-        startActivity(new Intent(getApplicationContext(),AddTagActivity.class));
+        startActivityForResult(new Intent(getApplicationContext(), AddTagActivity.class), AddTagActivity.REQUEST_CODE);
     }
 
     class TagAdapter extends RecyclerView.Adapter<CommonViewHolder> {
@@ -77,6 +102,10 @@ public class MainActivity extends AppCompatActivity {
 
         public void addAll(List<Tag> data) {
             this.data.addAll(data);
+        }
+
+        public void clearAll() {
+            this.data.clear();
         }
 
         @Override

@@ -37,4 +37,12 @@
                 android:src="@drawable/btn_check_buttonless_on" />
         </RelativeLayout>
     </android.support.v7.widget.Toolbar>
+    <EditText
+        android:id="@+id/etContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="top"
+        android:padding="8dp"
+        android:background="@null"
+        />
 </LinearLayout>
