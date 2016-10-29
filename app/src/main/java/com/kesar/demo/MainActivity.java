@@ -11,13 +11,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.kesar.demo.adapter.ListAdapter;
 import com.kesar.demo.adapter.CommonViewHolder;
 import com.kesar.demo.domain.Tag;
 
 import org.kesar.lazy.lazydb.LazyDB;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -56,9 +56,9 @@ public class MainActivity extends AppCompatActivity {
                     loadData();
                     break;
                 case EditTagActivity.REQUEST_CODE:
-                    int position=data.getIntExtra(EditTagActivity.Extra_Position,0);
-                    Tag tag= (Tag) data.getSerializableExtra(Tag.class.getName());
-                    adapter.setItem(position,tag);
+                    int position = data.getIntExtra(EditTagActivity.Extra_Position, 0);
+                    Tag tag = (Tag) data.getSerializableExtra(Tag.class.getName());
+                    adapter.setItem(position, tag);
                     adapter.notifyItemChanged(position);
                     break;
             }
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(int position, View view) {
                 Intent intent = new Intent(getApplicationContext(), EditTagActivity.class);
                 intent.putExtra(Tag.class.getName(), adapter.getItem(position));
-                intent.putExtra(EditTagActivity.Extra_Position,position);
+                intent.putExtra(EditTagActivity.Extra_Position, position);
                 startActivityForResult(intent, EditTagActivity.REQUEST_CODE);
             }
         });
@@ -98,33 +98,9 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(new Intent(getApplicationContext(), AddTagActivity.class), AddTagActivity.REQUEST_CODE);
     }
 
-    static class TagAdapter extends RecyclerView.Adapter<CommonViewHolder> {
+    static class TagAdapter extends ListAdapter<Tag, CommonViewHolder> {
 
         private OnItemClickListener mOnItemClickListener;
-        private List<Tag> data = new ArrayList<>();
-
-        public TagAdapter() {
-        }
-
-        public TagAdapter(List<Tag> data) {
-            this.data.addAll(data);
-        }
-
-        public void addAll(List<Tag> data) {
-            this.data.addAll(data);
-        }
-
-        public void setItem(int position,Tag data){
-            this.data.set(position,data);
-        }
-
-        public void clearAll() {
-            this.data.clear();
-        }
-
-        public Tag getItem(int position) {
-            return data.get(position);
-        }
 
         @Override
         public CommonViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -132,12 +108,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onBindViewHolder(CommonViewHolder holder, final int position) {
-            Tag tag = data.get(position);
+        public void onBindViewHolder(CommonViewHolder holder, Tag data, final int position) {
             TextView tvTime = holder.getView(R.id.tvTime);
             TextView tvText = holder.getView(R.id.tvText);
-            tvText.setText(tag.getText());
-            tvTime.setText(tag.getTime());
+            tvText.setText(data.getText());
+            tvTime.setText(data.getTime());
             if (mOnItemClickListener != null) {
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -146,11 +121,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
-        }
-
-        @Override
-        public int getItemCount() {
-            return data.size();
         }
 
         public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
