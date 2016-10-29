@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageView;
 
 import com.kesar.demo.domain.Tag;
 
@@ -25,10 +24,6 @@ public class EditTagActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 2;
     public static final String Extra_Position = "position";
 
-    @BindView(R.id.ivBack)
-    ImageView ivBack;
-    @BindView(R.id.ivFinish)
-    ImageView ivFinish;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.etContent)
@@ -56,13 +51,13 @@ public class EditTagActivity extends AppCompatActivity {
         etContent.setText(mTag.getText());
     }
 
-    @OnClick({R.id.ivBack, R.id.ivFinish})
+    @OnClick({R.id.tvCancel, R.id.tvFinish})
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.ivBack:
+            case R.id.tvCancel:
                 onBackPressed();
                 break;
-            case R.id.ivFinish:
+            case R.id.tvFinish:
                 try {
                     String text = etContent.getText().toString();
                     mTag.setText(text);

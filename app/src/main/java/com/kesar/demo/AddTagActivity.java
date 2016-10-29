@@ -8,7 +8,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageView;
 
 import com.kesar.demo.domain.Tag;
 
@@ -27,14 +26,10 @@ import butterknife.OnClick;
  * Created by kesar on 16-10-28.
  */
 public class AddTagActivity extends AppCompatActivity {
-    public static final int REQUEST_CODE=1;
+    public static final int REQUEST_CODE = 1;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
-    @BindView(R.id.ivBack)
-    ImageView ivBack;
-    @BindView(R.id.ivFinish)
-    ImageView ivFinish;
     @BindView(R.id.etContent)
     EditText etContent;
 
@@ -48,15 +43,17 @@ public class AddTagActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
     }
 
-    @OnClick({R.id.ivBack, R.id.ivFinish})
+    @OnClick({R.id.tvCancel, R.id.tvFinish})
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.ivBack:
+            case R.id.tvCancel:
                 onBackPressed();
                 break;
-            case R.id.ivFinish:
+            case R.id.tvFinish:
                 String text = etContent.getText().toString();
-                if (!TextUtils.isEmpty(text)) {
+                if (TextUtils.isEmpty(text)) {
+                    Snackbar.make(view, "记录不能为空", Snackbar.LENGTH_SHORT).show();
+                } else {
                     Tag tag = new Tag();
                     tag.setId(UUID.randomUUID().toString());
                     tag.setText(text);

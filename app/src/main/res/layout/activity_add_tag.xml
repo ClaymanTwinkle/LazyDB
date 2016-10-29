@@ -13,28 +13,25 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         app:popupTheme="@style/AppTheme.PopupOverlay">
-
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
-            <ImageView
-                android:id="@+id/ivBack"
+            <TextView
+                android:id="@+id/tvCancel"
                 android:layout_width="?attr/actionBarSize"
                 android:layout_height="?attr/actionBarSize"
-                android:layout_centerVertical="true"
-                android:scaleType="centerInside"
-                android:src="@android:drawable/ic_delete" />
-
-            <ImageView
-                android:id="@+id/ivFinish"
+                android:text="@string/cancel"
+                android:gravity="center"
+                />
+            <TextView
+                android:id="@+id/tvFinish"
                 android:layout_width="?attr/actionBarSize"
                 android:layout_height="?attr/actionBarSize"
+                android:text="@string/finish"
                 android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
+                android:gravity="center"
                 android:layout_marginRight="16dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/btn_check_buttonless_on" />
+                />
         </RelativeLayout>
     </android.support.v7.widget.Toolbar>
     <EditText
