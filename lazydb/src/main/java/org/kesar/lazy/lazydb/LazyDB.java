@@ -97,6 +97,34 @@ public final class LazyDB {
         db.execSQL(sql);
     }
 
+
+    /**
+     * 删除表
+     *
+     * @param clazz 类
+     */
+    public void dropTable(final Class<?> clazz) throws Exception {
+        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
+            @Override
+            public void onNoQuery(SQLiteDatabase db) throws Exception {
+                String sql = SqlBuilder.buildDropTableSql(clazz);
+                db.execSQL(sql);
+            }
+        });
+    }
+
+    /**
+     * 删除数据库中所有的表
+     */
+    public void dropAllTables() throws Exception {
+        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
+            @Override
+            public void onNoQuery(SQLiteDatabase db) throws Exception {
+                helper.deleteAllTables(db);
+            }
+        });
+    }
+
     /**
      * 查询所有表名
      *
@@ -147,29 +175,6 @@ public final class LazyDB {
             }
         }
         return columnInfos;
-    }
-
-    /**
-     * 删除表
-     *
-     * @param clazz 类
-     */
-    public void dropTable(Class<?> clazz) {
-        SQLiteDatabase db = helper.getWritableDatabase();
-        String sql = SqlBuilder.buildDropTableSql(clazz);
-        db.execSQL(sql);
-    }
-
-    /**
-     * 删除数据库中所有的表
-     */
-    public void dropAllTables() throws Exception {
-        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
-            @Override
-            public void onNoQuery(SQLiteDatabase db) throws Exception {
-                helper.deleteAllTables(db);
-            }
-        });
     }
 
     /**
