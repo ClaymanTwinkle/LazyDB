@@ -61,7 +61,7 @@ public class LazyDBUnitTest
     @Test
     public void queryAllTableNames() throws Exception
     {
-        List<String> list = lazyDB.selectAllTableNames();
+        List<String> list = lazyDB.queryAllTableNames();
         print("查询所有表：" + list.toString());
     }
 

@@ -92,9 +92,25 @@ public class SelectBuilder<T>
 
         SQLiteDatabase db = helper.getReadableDatabase();
 
+        // 查询表是否存在
+        String sql = SqlBuilder.buildQueryTableIsExistSql(objectClass);
+        Cursor cursor = db.rawQuery(sql, null);
+        if (cursor != null) {
+            try {
+                if (cursor.moveToNext()) {
+                    if (cursor.getInt(0) == 0) {
+                        return results;
+                    }
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
         //String sql = SqlBuilder.buildQuerySql(TableUtil.getTableName(objectClass), columns, whereSection, whereArgs, groupBy, having, orderBy, limit);
         //Cursor cursor = db.rawQuery(sql, null);
-        Cursor cursor=db.query(TableUtil.getTableName(objectClass),columns,whereSection,whereArgs,groupBy,having,orderBy,limit);
+        // 执行查询
+        cursor=db.query(TableUtil.getTableName(objectClass),columns,whereSection,whereArgs,groupBy,having,orderBy,limit);
         if (cursor != null)
         {
             try

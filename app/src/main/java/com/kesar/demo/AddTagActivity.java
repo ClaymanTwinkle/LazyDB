@@ -66,7 +66,7 @@ public class AddTagActivity extends AppCompatActivity {
                         lazyDB.insert(tag);
                         setResult(RESULT_OK);
                         finish();
-                    } catch (IllegalAccessException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                         Snackbar.make(view, "添加备忘录失败", Snackbar.LENGTH_SHORT).show();
                     }

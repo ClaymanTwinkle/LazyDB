@@ -57,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case EditTagActivity.REQUEST_CODE:
                     int position=data.getIntExtra(EditTagActivity.Extra_Position,0);
+                    Tag tag= (Tag) data.getSerializableExtra(Tag.class.getName());
+                    adapter.setItem(position,tag);
                     adapter.notifyItemChanged(position);
                     break;
             }
@@ -84,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
     private void loadData() {
         try {
             List<Tag> tagList = mLazyDB.query(Tag.class).selectAll().execute();
-            System.err.println(tagList);
             adapter.addAll(tagList);
             adapter.notifyDataSetChanged();
         } catch (InstantiationException | ParseException | IllegalAccessException | NoSuchFieldException e) {
@@ -111,6 +112,10 @@ public class MainActivity extends AppCompatActivity {
 
         public void addAll(List<Tag> data) {
             this.data.addAll(data);
+        }
+
+        public void setItem(int position,Tag data){
+            this.data.set(position,data);
         }
 
         public void clearAll() {

@@ -69,9 +69,10 @@ public class EditTagActivity extends AppCompatActivity {
                     mLazyDB.update(mTag);
                     Intent data = new Intent();
                     data.putExtra(Extra_Position, position);
+                    data.putExtra(Tag.class.getName(),mTag);
                     setResult(RESULT_OK, data);
                     finish();
-                } catch (IllegalAccessException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 break;

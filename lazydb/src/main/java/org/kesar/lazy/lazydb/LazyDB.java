@@ -184,7 +184,17 @@ public final class LazyDB {
      * @return true 表存在，false 表不存在
      */
     public boolean isTableExist(Class<?> clazz) {
-        String sql = SqlBuilder.buildQueryTableIsExistSql(clazz);
+        return isTableExist(TableUtil.getTableName(clazz));
+    }
+
+    /**
+     * 表是否存在
+     *
+     * @param tableName 表名
+     * @return true 表存在，false 表不存在
+     */
+    public boolean isTableExist(String tableName) {
+        String sql = SqlBuilder.buildQueryTableIsExistSql(tableName);
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.rawQuery(sql, null);
         if (cursor != null) {
@@ -293,7 +303,6 @@ public final class LazyDB {
             public void onNoQuery(SQLiteDatabase db) throws Exception {
                 // 根据id更新object
                 KeyValue idColumn = TableUtil.getIDColumn(object);
-
                 if (null == idColumn) {
                     throw new IllegalStateException("Object does not include the id field");
                 }
@@ -434,26 +443,30 @@ public final class LazyDB {
      * @throws ParseException
      * @throws IllegalAccessException
      */
-    public <T> T queryById(Class<T> clazz, Object id) throws NoSuchFieldException, InstantiationException, ParseException, IllegalAccessException {
+    public <T> T queryById(Class<T> clazz, Object id) throws Exception {
         T object = null;
+        String tableName = TableUtil.getTableName(clazz);
+        if (isTableExist(tableName)) {
+            String idName = TableUtil.getId(clazz);
+            // 如果id不存在
+            if (TextUtils.isEmpty(idName)) {
+                throw new IllegalStateException("object have to have a id column!");
+            }
 
-        String idName = TableUtil.getId(clazz);
-        // 如果id不存在
-        if (TextUtils.isEmpty(idName)) {
-            throw new IllegalStateException("object have to have a id column!");
-        }
-
-        SQLiteDatabase db = helper.getReadableDatabase();
-        Cursor cursor = db.query(TableUtil.getTableName(clazz), null, idName + "=?", new String[]{id.toString()}, null, null, null);
-        if (cursor != null) {
-            try {
-                while (cursor.moveToNext()) {
-                    object = ObjectUtil.buildObject(clazz, cursor);
+            SQLiteDatabase db = helper.getReadableDatabase();
+            Cursor cursor = db.query(tableName, null, idName + "=?", new String[]{id.toString()}, null, null, null);
+            if (cursor != null) {
+                try {
+                    while (cursor.moveToNext()) {
+                        object = ObjectUtil.buildObject(clazz, cursor);
+                    }
+                } finally {
+                    cursor.close();
                 }
-            } finally {
-                cursor.close();
             }
         }
         return object;
     }
+
+
 }
