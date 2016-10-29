@@ -17,43 +17,34 @@ import org.kesar.lazy.lazydb.config.DeBugLogger;
  * SQLiteOpenHelper实现类
  * Created by kesar on 2016/6/21 0021.
  */
-public class SqliteDBHelper extends SQLiteOpenHelper
-{
+public class SqliteDBHelper extends SQLiteOpenHelper {
     private DBUpgradeListener mDbUpgradeListener;
 
-    public SqliteDBHelper(DBConfig config)
-    {
+    public SqliteDBHelper(DBConfig config) {
         super(config.getContext(), config.getDBName(), null, config.getDBVersion());
         this.mDbUpgradeListener = config.getUpgradeListener();
     }
 
-    public SqliteDBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version)
-    {
+    public SqliteDBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public SqliteDBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version, DatabaseErrorHandler errorHandler)
-    {
+    public SqliteDBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version, DatabaseErrorHandler errorHandler) {
         super(context, name, factory, version, errorHandler);
     }
 
     @Override
-    public void onCreate(SQLiteDatabase db)
-    {
+    public void onCreate(SQLiteDatabase db) {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
-    {
-        DeBugLogger.d("onUpgrade DataBase from version "+oldVersion+" to "+newVersion);
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        DeBugLogger.d("onUpgrade DataBase from version " + oldVersion + " to " + newVersion);
 
-        if (mDbUpgradeListener != null)
-        {
+        if (mDbUpgradeListener != null) {
             mDbUpgradeListener.onUpgrade(db, oldVersion, newVersion);
-        }
-        else
-        {
+        } else {
             // 默认删除表
             deleteAllTables(db);
         }
@@ -64,26 +55,42 @@ public class SqliteDBHelper extends SQLiteOpenHelper
      *
      * @param db
      */
-    public void deleteAllTables(SQLiteDatabase db)
-    {
-        String queryAllTableNameSql=SqlBuilder.buildQueryAllTableNamesSql();
+    public void deleteAllTables(SQLiteDatabase db) {
+        String queryAllTableNameSql = SqlBuilder.buildQueryAllTableNamesSql();
 
         Cursor cursor = db.rawQuery(queryAllTableNameSql, null);
-        if (cursor != null)
-        {
-            try
-            {
-                while (cursor.moveToNext())
-                {
+        if (cursor != null) {
+            try {
+                while (cursor.moveToNext()) {
                     String dropTableSql = SqlBuilder.buildDropTableSql(cursor.getString(0));
                     // 执行删除表的sql语句
                     db.execSQL(dropTableSql);
                 }
-            }
-            finally
-            {
+            } finally {
                 cursor.close();
             }
         }
+    }
+
+    /**
+     * 执行非查询操作事物
+     *
+     * @param operation 非查询操作
+     */
+    public void executeNoQueryTransaction(NoQueryOperation operation) throws Exception {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            db.beginTransaction();
+            if (operation != null) {
+                operation.onNoQuery(db);
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public static interface NoQueryOperation {
+        void onNoQuery(SQLiteDatabase db) throws Exception;
     }
 }

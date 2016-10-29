@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import org.kesar.lazy.lazydb.builder.SelectBuilder;
@@ -82,34 +83,6 @@ public final class LazyDB {
     }
 
     /**
-     * 从表中查找出所有字段名
-     *
-     * @param clazz class
-     * @return 字段列表
-     * @throws NoSuchFieldException
-     * @throws InstantiationException
-     * @throws ParseException
-     * @throws IllegalAccessException
-     */
-    public List<ColumnInfo> queryAllColumnsFromTable(Class<?> clazz) throws NoSuchFieldException, InstantiationException, ParseException, IllegalAccessException {
-        List<ColumnInfo> columnInfos = new ArrayList<>();
-        String sql = SqlBuilder.buildQueryTableInfoSql(clazz);
-        SQLiteDatabase db = helper.getReadableDatabase();
-        Cursor cursor = db.rawQuery(sql, null);
-        if (cursor != null) {
-            try {
-                while (cursor.moveToNext()) {
-                    ColumnInfo columnInfo = ObjectUtil.buildObject(ColumnInfo.class, cursor);
-                    columnInfos.add(columnInfo);
-                }
-            } finally {
-                cursor.close();
-            }
-        }
-        return columnInfos;
-    }
-
-    /**
      * 创建表
      *
      * @param tableName       表名
@@ -147,6 +120,35 @@ public final class LazyDB {
         return tableNames;
     }
 
+
+    /**
+     * 从表中查找出所有字段名
+     *
+     * @param clazz class
+     * @return 字段列表
+     * @throws NoSuchFieldException
+     * @throws InstantiationException
+     * @throws ParseException
+     * @throws IllegalAccessException
+     */
+    public List<ColumnInfo> queryAllColumnsFromTable(Class<?> clazz) throws NoSuchFieldException, InstantiationException, ParseException, IllegalAccessException {
+        List<ColumnInfo> columnInfos = new ArrayList<>();
+        String sql = SqlBuilder.buildQueryTableInfoSql(clazz);
+        SQLiteDatabase db = helper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(sql, null);
+        if (cursor != null) {
+            try {
+                while (cursor.moveToNext()) {
+                    ColumnInfo columnInfo = ObjectUtil.buildObject(ColumnInfo.class, cursor);
+                    columnInfos.add(columnInfo);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        return columnInfos;
+    }
+
     /**
      * 删除表
      *
@@ -161,9 +163,13 @@ public final class LazyDB {
     /**
      * 删除数据库中所有的表
      */
-    public void dropAllTables() {
-        SQLiteDatabase db = helper.getWritableDatabase();
-        helper.deleteAllTables(db);
+    public void dropAllTables() throws Exception {
+        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
+            @Override
+            public void onNoQuery(SQLiteDatabase db) throws Exception {
+                helper.deleteAllTables(db);
+            }
+        });
     }
 
     /**
@@ -200,8 +206,11 @@ public final class LazyDB {
     public boolean isObjectExist(Object object) throws IllegalAccessException {
         // 如果表存在
         if (isTableExist(object.getClass())) {
-            SQLiteDatabase db = helper.getReadableDatabase();
             KeyValue keyValue = TableUtil.getIDColumn(object);
+            if (keyValue == null) {
+                return false;
+            }
+            SQLiteDatabase db = helper.getReadableDatabase();
             Cursor cursor = db.query(TableUtil.getTableName(object.getClass()), new String[]{"count(*)"}, keyValue.getKey() + "=?", new String[]{keyValue.getValue().toString()}, null, null, null);
             if (cursor != null) {
                 try {
@@ -223,26 +232,20 @@ public final class LazyDB {
      *
      * @param object 对象
      */
-    public void insert(Object object) throws IllegalAccessException {
-        // 对象为空不处理
-        if (null == object) {
-            return;
-        }
-        Class<?> clazz = object.getClass();
+    public void insert(@NonNull final Object object) throws Exception {
+        final Class<?> clazz = object.getClass();
         // 表不存在，创建表
         if (!isTableExist(clazz)) {
             // 创建表
             createTable(clazz);
         }
         // 插入表
-        SQLiteDatabase db = helper.getWritableDatabase();
-        try {
-            db.beginTransaction();
-            db.insert(TableUtil.getTableName(clazz), null, TableUtil.getContentValues(object));
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
+        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
+            @Override
+            public void onNoQuery(SQLiteDatabase db) throws Exception {
+                db.insert(TableUtil.getTableName(clazz), null, TableUtil.getContentValues(object));
+            }
+        });
     }
 
     /**
@@ -251,28 +254,26 @@ public final class LazyDB {
      * @param objectList 对象集合
      * @throws IllegalAccessException
      */
-    public void insert(List objectList) throws IllegalAccessException {
+    public void insert(@NonNull final List objectList) throws Exception {
         // 对象为空不处理
-        if (null == objectList || objectList.isEmpty()) {
+        if (objectList.isEmpty()) {
             return;
         }
-        Class<?> clazz = objectList.get(0).getClass();
+        final Class<?> clazz = objectList.get(0).getClass();
         // 表不存在，创建表
         if (!isTableExist(clazz)) {
             // 创建表
             createTable(clazz);
         }
         // 插入表
-        SQLiteDatabase db = helper.getWritableDatabase();
-        try {
-            db.beginTransaction();
-            for (Object object : objectList) {
-                db.insert(TableUtil.getTableName(clazz), null, TableUtil.getContentValues(object));
+        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
+            @Override
+            public void onNoQuery(SQLiteDatabase db) throws Exception {
+                for (Object object : objectList) {
+                    db.insert(TableUtil.getTableName(clazz), null, TableUtil.getContentValues(object));
+                }
             }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
+        });
     }
 
     /**
@@ -281,37 +282,27 @@ public final class LazyDB {
      * @param object 对象
      * @throws IllegalAccessException
      */
-    public void update(Object object) throws IllegalAccessException {
-        // 对象为空不处理
-        if (null == object) {
-            return;
-        }
-        // 数据库表不存在不处理
-//        if (!isTableExist(object.getClass()))
-//        {
-//            return;
-//        }
-        SQLiteDatabase db = helper.getWritableDatabase();
-        KeyValue idColumn = TableUtil.getIDColumn(object);
+    public void update(@NonNull final Object object) throws Exception {
+        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
+            @Override
+            public void onNoQuery(SQLiteDatabase db) throws Exception {
+                // 根据id更新object
+                KeyValue idColumn = TableUtil.getIDColumn(object);
 
-        if (null == idColumn) {
-            throw new IllegalStateException("Object does not include the id field");
-        }
-        if (null == idColumn.getValue()) {
-            throw new IllegalStateException("The value of the id field cannot be null");
-        }
-        String tableName = TableUtil.getTableName(object);
-        ContentValues values = TableUtil.getContentValuesWithOutID(object);
-        String whereClause = idColumn.getKey() + "=?";
-        String[] whereArgs = new String[]{idColumn.getValue().toString()};
-        try {
-            db.beginTransaction();
-            // 根据id更新object
-            db.update(tableName, values, whereClause, whereArgs);
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
+                if (null == idColumn) {
+                    throw new IllegalStateException("Object does not include the id field");
+                }
+                if (null == idColumn.getValue()) {
+                    throw new IllegalStateException("The value of the id field cannot be null");
+                }
+                String tableName = TableUtil.getTableName(object);
+                ContentValues values = TableUtil.getContentValuesWithOutID(object);
+                String whereClause = idColumn.getKey() + "=?";
+                String[] whereArgs = new String[]{idColumn.getValue().toString()};
+
+                db.update(tableName, values, whereClause, whereArgs);
+            }
+        });
     }
 
     /**
@@ -320,11 +311,7 @@ public final class LazyDB {
      * @param object 对象
      * @throws IllegalAccessException
      */
-    public void insertOrUpdate(Object object) throws IllegalAccessException {
-        // 对象为空不处理
-        if (null == object) {
-            return;
-        }
+    public void insertOrUpdate(@NonNull Object object) throws Exception {
         // 表不存在，创建表
         if (!isTableExist(object.getClass()) || !isObjectExist(object)) {
             insert(object);
@@ -339,37 +326,29 @@ public final class LazyDB {
      * @param object 对象
      * @throws IllegalAccessException
      */
-    public void delete(Object object) throws IllegalAccessException {
-        // 对象为空不处理
-        if (null == object) {
-            return;
-        }
+    public void delete(@NonNull final Object object) throws Exception {
         // 数据库表不存在不处理
         if (!isTableExist(object.getClass())) {
             return;
         }
+        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
+            @Override
+            public void onNoQuery(SQLiteDatabase db) throws Exception {
+                KeyValue column = TableUtil.getIDColumn(object);
+                if (null == column) {
+                    throw new IllegalStateException("Object does not include the id field");
+                }
+                if (null == column.getValue()) {
+                    throw new IllegalStateException("The value of the id field cannot be null");
+                }
 
-        SQLiteDatabase db = helper.getWritableDatabase();
-        KeyValue column = TableUtil.getIDColumn(object);
-
-        if (null == column) {
-            throw new IllegalStateException("Object does not include the id field");
-        }
-        if (null == column.getValue()) {
-            throw new IllegalStateException("The value of the id field cannot be null");
-        }
-        String tableName = TableUtil.getTableName(object);
-        String whereClause = column.getKey() + "=?";
-        String[] whereArgs = new String[]{column.getValue().toString()};
-
-        try {
-            db.beginTransaction();
-            // 根据id删除object
-            db.delete(tableName, whereClause, whereArgs);
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
+                String tableName = TableUtil.getTableName(object);
+                String whereClause = column.getKey() + "=?";
+                String[] whereArgs = new String[]{column.getValue().toString()};
+                // 根据id删除object
+                db.delete(tableName, whereClause, whereArgs);
+            }
+        });
     }
 
     /**
@@ -378,9 +357,9 @@ public final class LazyDB {
      * @param objectList object集合
      * @throws IllegalAccessException
      */
-    public void delete(List objectList) throws IllegalAccessException {
+    public void delete(@NonNull final List objectList) throws Exception {
         // 对象为空不处理
-        if (null == objectList || objectList.isEmpty()) {
+        if (objectList.isEmpty()) {
             return;
         }
         Class<?> clazz = objectList.get(0).getClass();
@@ -388,27 +367,25 @@ public final class LazyDB {
         if (!isTableExist(clazz)) {
             return;
         }
-        SQLiteDatabase db = helper.getWritableDatabase();
-        try {
-            db.beginTransaction();
-            for (Object object : objectList) {
-                KeyValue column = TableUtil.getIDColumn(object);
-                if (null == column) {
-                    throw new IllegalStateException("Object does not include the id field");
+        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
+            @Override
+            public void onNoQuery(SQLiteDatabase db) throws Exception {
+                for (Object object : objectList) {
+                    KeyValue column = TableUtil.getIDColumn(object);
+                    if (null == column) {
+                        throw new IllegalStateException("Object does not include the id field");
+                    }
+                    if (null == column.getValue()) {
+                        throw new IllegalStateException("The value of the id field cannot be null");
+                    }
+                    String tableName = TableUtil.getTableName(object);
+                    String whereClause = column.getKey() + "=?";
+                    String[] whereArgs = new String[]{column.getValue().toString()};
+                    // 根据id删除object
+                    db.delete(tableName, whereClause, whereArgs);
                 }
-                if (null == column.getValue()) {
-                    throw new IllegalStateException("The value of the id field cannot be null");
-                }
-                String tableName = TableUtil.getTableName(object);
-                String whereClause = column.getKey() + "=?";
-                String[] whereArgs = new String[]{column.getValue().toString()};
-                // 根据id删除object
-                db.delete(tableName, whereClause, whereArgs);
             }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-        }
+        });
     }
 
     /**
@@ -418,14 +395,17 @@ public final class LazyDB {
      * @param whereClause 例如：id=?
      * @param whereArgs   ?的值
      */
-    public void delete(Class<?> clazz, String whereClause, String[] whereArgs) {
+    public void delete(final Class<?> clazz, final String whereClause, final String[] whereArgs) throws Exception {
         // 数据库表不存在不处理
         if (!isTableExist(clazz)) {
             return;
         }
-
-        SQLiteDatabase db = helper.getWritableDatabase();
-        db.delete(TableUtil.getTableName(clazz), whereClause, whereArgs);
+        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
+            @Override
+            public void onNoQuery(SQLiteDatabase db) {
+                db.delete(TableUtil.getTableName(clazz), whereClause, whereArgs);
+            }
+        });
     }
 
     /**
@@ -452,12 +432,13 @@ public final class LazyDB {
     public <T> T queryById(Class<T> clazz, Object id) throws NoSuchFieldException, InstantiationException, ParseException, IllegalAccessException {
         T object = null;
 
-        SQLiteDatabase db = helper.getReadableDatabase();
         String idName = TableUtil.getId(clazz);
         // 如果id不存在
         if (TextUtils.isEmpty(idName)) {
             throw new IllegalStateException("object have to have a id column!");
         }
+
+        SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.query(TableUtil.getTableName(clazz), null, idName + "=?", new String[]{id.toString()}, null, null, null);
         if (cursor != null) {
             try {
