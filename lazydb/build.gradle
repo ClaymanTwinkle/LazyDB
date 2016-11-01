@@ -67,7 +67,6 @@ install {
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
     classifier = 'sources'
-    exclude '*'
 }
 
 task javadoc(type: Javadoc) {
@@ -93,6 +92,7 @@ bintray {
     // 上面两个 user和key 需要留意一下，在local.properites 里面配置的
     configurations = ['archives']
     pkg {
+        userOrg="lazyandroid"
         repo = "maven"
         name = "LazyDB"
         websiteUrl = siteUrl
