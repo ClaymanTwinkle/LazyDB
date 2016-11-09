@@ -1,5 +1,8 @@
 package com.kesar.demo;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -9,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.TextView;
 
 import com.kesar.demo.adapter.ListAdapter;
@@ -81,6 +85,26 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, EditTagActivity.REQUEST_CODE);
             }
         });
+        adapter.setOnItemLongClickListener(new TagAdapter.OnItemLongClickListener() {
+            @Override
+            public void onItemLongClick(final int position, View view) {
+                new AlertDialog.Builder(MainActivity.this)
+                        .setMessage("确定要删除吗？")
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    mLazyDB.delete(adapter.getItem(position));
+                                    adapter.remove(position);
+                                    adapter.notifyItemRemoved(position);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        })
+                        .setNegativeButton("取消", null).show();
+            }
+        });
     }
 
     private void loadData() {
@@ -101,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
     static class TagAdapter extends ListAdapter<Tag, CommonViewHolder> {
 
         private OnItemClickListener mOnItemClickListener;
+        private OnItemLongClickListener mOnItemLongClickListener;
 
         @Override
         public CommonViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -121,14 +146,31 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
+            if(mOnItemLongClickListener!=null){
+                holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        mOnItemLongClickListener.onItemLongClick(position,v);
+                        return true;
+                    }
+                });
+            }
         }
 
         public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
             mOnItemClickListener = onItemClickListener;
         }
 
+        public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
+            this.mOnItemLongClickListener = onItemLongClickListener;
+        }
+
         public static interface OnItemClickListener {
             void onItemClick(int position, View view);
+        }
+
+        public static interface OnItemLongClickListener{
+            void onItemLongClick(int position,View view);
         }
     }
 }

@@ -6,6 +6,8 @@ import android.support.v7.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.R.attr.data;
+
 /**
  * ListAdapter for RecyclerView
  * Created by kesar on 2016/10/29 0029.
@@ -57,5 +59,13 @@ public abstract class ListAdapter<T, VH extends RecyclerView.ViewHolder> extends
     public void clearAll() {
         this.mData.clear();
         notifyDataSetChanged();
+    }
+
+    public void remove(int index){
+        this.mData.remove(index);
+    }
+
+    public void remove(@NonNull T data){
+        this.mData.remove(data);
     }
 }
