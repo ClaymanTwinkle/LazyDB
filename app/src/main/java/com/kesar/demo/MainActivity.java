@@ -1,7 +1,7 @@
 package com.kesar.demo;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,12 +12,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.TextView;
 
-import com.kesar.demo.adapter.ListAdapter;
-import com.kesar.demo.adapter.CommonViewHolder;
 import com.kesar.demo.domain.Tag;
+import com.kesar.lazy.recyclerview.CommonViewHolder;
+import com.kesar.lazy.recyclerview.ListAdapter;
 
 import org.kesar.lazy.lazydb.LazyDB;
 
@@ -55,16 +54,17 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
-                case AddTagActivity.REQUEST_CODE:
-                    adapter.clearAll();
-                    loadData();
+                case AddTagActivity.REQUEST_CODE: {
+                    Tag tag = (Tag) data.getSerializableExtra(Tag.class.getName());
+                    adapter.addAndRefresh(tag);
                     break;
-                case EditTagActivity.REQUEST_CODE:
+                }
+                case EditTagActivity.REQUEST_CODE: {
                     int position = data.getIntExtra(EditTagActivity.Extra_Position, 0);
                     Tag tag = (Tag) data.getSerializableExtra(Tag.class.getName());
-                    adapter.setItem(position, tag);
-                    adapter.notifyItemChanged(position);
+                    adapter.setAndRefresh(position, tag);
                     break;
+                }
             }
         }
     }
@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         adapter = new TagAdapter();
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        adapter.setOnItemClickListener(new TagAdapter.OnItemClickListener() {
+        adapter.setOnItemClickListener(new ListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position, View view) {
                 Intent intent = new Intent(getApplicationContext(), EditTagActivity.class);
@@ -85,9 +85,9 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, EditTagActivity.REQUEST_CODE);
             }
         });
-        adapter.setOnItemLongClickListener(new TagAdapter.OnItemLongClickListener() {
+        adapter.setOnItemLongClickListener(new ListAdapter.OnItemLongClickListener() {
             @Override
-            public void onItemLongClick(final int position, View view) {
+            public void onLongItemClick(final int position, View view) {
                 new AlertDialog.Builder(MainActivity.this)
                         .setMessage("确定要删除吗？")
                         .setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
     private void loadData() {
         try {
             List<Tag> tagList = mLazyDB.query(Tag.class).selectAll().execute();
-            adapter.addAll(tagList);
+            adapter.setAllAndRefresh(tagList);
             adapter.notifyDataSetChanged();
         } catch (InstantiationException | ParseException | IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
@@ -124,11 +124,8 @@ public class MainActivity extends AppCompatActivity {
 
     static class TagAdapter extends ListAdapter<Tag, CommonViewHolder> {
 
-        private OnItemClickListener mOnItemClickListener;
-        private OnItemLongClickListener mOnItemLongClickListener;
-
         @Override
-        public CommonViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public CommonViewHolder onCreateViewHolder(ViewGroup parent, Context context, int viewType) {
             return new CommonViewHolder(View.inflate(parent.getContext(), R.layout.list_item_tag, null));
         }
 
@@ -138,39 +135,7 @@ public class MainActivity extends AppCompatActivity {
             TextView tvText = holder.getView(R.id.tvText);
             tvText.setText(data.getText());
             tvTime.setText(data.getTime());
-            if (mOnItemClickListener != null) {
-                holder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mOnItemClickListener.onItemClick(position, v);
-                    }
-                });
-            }
-            if(mOnItemLongClickListener!=null){
-                holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
-                        mOnItemLongClickListener.onItemLongClick(position,v);
-                        return true;
-                    }
-                });
-            }
         }
 
-        public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
-            mOnItemClickListener = onItemClickListener;
-        }
-
-        public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
-            this.mOnItemLongClickListener = onItemLongClickListener;
-        }
-
-        public static interface OnItemClickListener {
-            void onItemClick(int position, View view);
-        }
-
-        public static interface OnItemLongClickListener{
-            void onItemLongClick(int position,View view);
-        }
     }
 }

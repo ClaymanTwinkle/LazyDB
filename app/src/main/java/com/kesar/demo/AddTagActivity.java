@@ -1,5 +1,6 @@
 package com.kesar.demo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -61,7 +62,9 @@ public class AddTagActivity extends AppCompatActivity {
                     try {
                         LazyDB lazyDB = LazyDB.create(getApplicationContext());
                         lazyDB.insert(tag);
-                        setResult(RESULT_OK);
+                        Intent intent=new Intent();
+                        intent.putExtra(Tag.class.getName(),tag);
+                        setResult(RESULT_OK,intent);
                         finish();
                     } catch (Exception e) {
                         e.printStackTrace();
