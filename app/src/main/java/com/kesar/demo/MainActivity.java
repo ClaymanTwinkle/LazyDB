@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,13 +29,11 @@ import butterknife.OnClick;
 public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.toolbar)
-    Toolbar toolbar;
+    Toolbar mToolbar;
     @BindView(R.id.recyclerView)
-    RecyclerView recyclerView;
-    @BindView(R.id.fab)
-    FloatingActionButton fab;
+    RecyclerView mRecyclerView;
 
-    private TagAdapter adapter;
+    private TagAdapter mAdapter;
     private LazyDB mLazyDB;
 
     @Override
@@ -56,13 +53,13 @@ public class MainActivity extends AppCompatActivity {
             switch (requestCode) {
                 case AddTagActivity.REQUEST_CODE: {
                     Tag tag = (Tag) data.getSerializableExtra(Tag.class.getName());
-                    adapter.addAndRefresh(tag);
+                    mAdapter.addAndRefresh(tag);
                     break;
                 }
                 case EditTagActivity.REQUEST_CODE: {
                     int position = data.getIntExtra(EditTagActivity.Extra_Position, 0);
                     Tag tag = (Tag) data.getSerializableExtra(Tag.class.getName());
-                    adapter.setAndRefresh(position, tag);
+                    mAdapter.setAndRefresh(position, tag);
                     break;
                 }
             }
@@ -70,22 +67,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        // toolbar
-        setSupportActionBar(toolbar);
+        // mToolbar
+        setSupportActionBar(mToolbar);
         // TagAdapter
-        adapter = new TagAdapter();
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        adapter.setOnItemClickListener(new ListAdapter.OnItemClickListener() {
+        mAdapter = new TagAdapter();
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        mAdapter.setOnItemClickListener(new ListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position, View view) {
                 Intent intent = new Intent(getApplicationContext(), EditTagActivity.class);
-                intent.putExtra(Tag.class.getName(), adapter.getItem(position));
+                intent.putExtra(Tag.class.getName(), mAdapter.getItem(position));
                 intent.putExtra(EditTagActivity.Extra_Position, position);
                 startActivityForResult(intent, EditTagActivity.REQUEST_CODE);
             }
         });
-        adapter.setOnItemLongClickListener(new ListAdapter.OnItemLongClickListener() {
+        mAdapter.setOnItemLongClickListener(new ListAdapter.OnItemLongClickListener() {
             @Override
             public void onLongItemClick(final int position, View view) {
                 new AlertDialog.Builder(MainActivity.this)
@@ -94,9 +91,9 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
-                                    mLazyDB.delete(adapter.getItem(position));
-                                    adapter.remove(position);
-                                    adapter.notifyItemRemoved(position);
+                                    mLazyDB.delete(mAdapter.getItem(position));
+                                    mAdapter.remove(position);
+                                    mAdapter.notifyItemRemoved(position);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -110,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
     private void loadData() {
         try {
             List<Tag> tagList = mLazyDB.query(Tag.class).selectAll().execute();
-            adapter.setAllAndRefresh(tagList);
-            adapter.notifyDataSetChanged();
+            mAdapter.setAllAndRefresh(tagList);
+            mAdapter.notifyDataSetChanged();
         } catch (InstantiationException | ParseException | IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }

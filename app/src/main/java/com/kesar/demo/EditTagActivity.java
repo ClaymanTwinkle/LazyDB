@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 
 import com.kesar.demo.domain.Tag;
@@ -23,16 +22,16 @@ import butterknife.OnClick;
  */
 public class EditTagActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 2;
-    public static final String Extra_Position = "position";
+    public static final String Extra_Position = "mPosition";
 
     @BindView(R.id.toolbar)
-    Toolbar toolbar;
+    Toolbar mToolbar;
     @BindView(R.id.etContent)
-    EditText etContent;
+    EditText mEtContent;
 
     private LazyDB mLazyDB;
     private Tag mTag;
-    private int position;
+    private int mPosition;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,14 +41,14 @@ public class EditTagActivity extends AppCompatActivity {
 
         mLazyDB = LazyDB.create(getApplicationContext());
         mTag = (Tag) getIntent().getSerializableExtra(Tag.class.getName());
-        position = getIntent().getIntExtra(Extra_Position, 0);
+        mPosition = getIntent().getIntExtra(Extra_Position, 0);
         initView();
     }
 
     private void initView() {
-        // toolbar
-        setSupportActionBar(toolbar);
-        etContent.setText(mTag.getText());
+        // mToolbar
+        setSupportActionBar(mToolbar);
+        mEtContent.setText(mTag.getText());
     }
 
     @OnClick({R.id.tvCancel, R.id.tvFinish})
@@ -60,11 +59,11 @@ public class EditTagActivity extends AppCompatActivity {
                 break;
             case R.id.tvFinish:
                 try {
-                    String text = etContent.getText().toString();
+                    String text = mEtContent.getText().toString();
                     mTag.setText(text);
                     mLazyDB.update(mTag);
                     Intent data = new Intent();
-                    data.putExtra(Extra_Position, position);
+                    data.putExtra(Extra_Position, mPosition);
                     data.putExtra(Tag.class.getName(),mTag);
                     setResult(RESULT_OK, data);
                     finish();

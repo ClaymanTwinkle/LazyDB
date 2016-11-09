@@ -30,9 +30,9 @@ public class AddTagActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 1;
 
     @BindView(R.id.toolbar)
-    Toolbar toolbar;
+    Toolbar mToolbar;
     @BindView(R.id.etContent)
-    EditText etContent;
+    EditText mEtContent;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,8 +40,8 @@ public class AddTagActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_tag);
         ButterKnife.bind(this);
 
-        // toolbar
-        setSupportActionBar(toolbar);
+        // mToolbar
+        setSupportActionBar(mToolbar);
     }
 
     @OnClick({R.id.tvCancel, R.id.tvFinish})
@@ -51,7 +51,7 @@ public class AddTagActivity extends AppCompatActivity {
                 onBackPressed();
                 break;
             case R.id.tvFinish:
-                String text = etContent.getText().toString();
+                String text = mEtContent.getText().toString();
                 if (TextUtils.isEmpty(text)) {
                     Snackbar.make(view, "记录不能为空", Snackbar.LENGTH_SHORT).show();
                 } else {
