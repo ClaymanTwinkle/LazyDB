@@ -28,7 +28,7 @@ dependencies {
 }
 
 
-version = "1.0.2"
+version = "1.0.1"
 def siteUrl = 'https://github.com/ClaymanTwinkle/LazyDB'
 def gitUrl = 'https://github.com/ClaymanTwinkle/LazyDB.git'
 group = "com.kesar"
@@ -92,7 +92,7 @@ bintray {
     // 上面两个 user和key 需要留意一下，在local.properites 里面配置的
     configurations = ['archives']
     pkg {
-        userOrg="lazyandroid"
+        //userOrg="lazyandroid"
         repo = "maven"
         name = "LazyDB"
         websiteUrl = siteUrl
