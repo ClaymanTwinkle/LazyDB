@@ -5,22 +5,23 @@ import android.content.ContentValues;
 import org.kesar.lazy.lazydb.annotate.ID;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Date;
+
+import static android.R.attr.name;
 
 /**
  * 数据库表操作工具类
  * Created by kesar on 2016/6/21 0021.
  */
-public final class TableUtil
-{
+public final class TableUtil {
     /**
      * 获取表名
      *
      * @param object 类实例
      * @return 表名
      */
-    public static String getTableName(Object object)
-    {
+    public static String getTableName(Object object) {
         return getTableName(object.getClass());
     }
 
@@ -30,8 +31,7 @@ public final class TableUtil
      * @param clazz 类
      * @return 表名
      */
-    public static String getTableName(Class<?> clazz)
-    {
+    public static String getTableName(Class<?> clazz) {
         return clazz.getName().replace(".", "_");
     }
 
@@ -42,72 +42,51 @@ public final class TableUtil
      * @return ContentValues
      * @throws IllegalAccessException
      */
-    public static ContentValues getContentValues(Object object) throws IllegalAccessException
-    {
+    public static ContentValues getContentValues(Object object) throws IllegalAccessException {
         ContentValues values = new ContentValues();
         Class<?> clazz = object.getClass();
         Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields)
-        {
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
+                continue;
+            }
             String name = field.getName();
             field.setAccessible(true);
             Object value = field.get(object);
 
-            if (value == null)
-            {
+            if (value == null) {
                 continue;
             }
 
-            if (value instanceof String)
-            {
+            if (value instanceof String) {
                 values.put(name, String.valueOf(value));
-            }
-            else if (value instanceof Date)
-            {
+            } else if (value instanceof Date) {
                 String dateString = DateUtil.date2String((Date) value);
                 values.put(name, dateString);
-            }
-            else if (value instanceof Double
-                    || value.getClass() == double.class)
-            {
+            } else if (value instanceof Double
+                    || value.getClass() == double.class) {
                 values.put(name, Double.valueOf(String.valueOf(value)));
-            }
-            else if (value instanceof Float
-                    || value.getClass() == float.class)
-            {
+            } else if (value instanceof Float
+                    || value.getClass() == float.class) {
                 values.put(name, Float.valueOf(String.valueOf(value)));
-            }
-            else if (value instanceof Long
-                    || value.getClass() == long.class)
-            {
+            } else if (value instanceof Long
+                    || value.getClass() == long.class) {
                 values.put(name, Long.valueOf(String.valueOf(value)));
-            }
-            else if (value instanceof Integer
-                    || value.getClass() == int.class)
-            {
+            } else if (value instanceof Integer
+                    || value.getClass() == int.class) {
                 values.put(name, Integer.valueOf(String.valueOf(value)));
-            }
-            else if (value instanceof Short
-                    || value.getClass() == short.class)
-            {
+            } else if (value instanceof Short
+                    || value.getClass() == short.class) {
                 values.put(name, Short.valueOf(String.valueOf(value)));
-            }
-            else if (value instanceof Byte
-                    || value.getClass() == byte.class)
-            {
+            } else if (value instanceof Byte
+                    || value.getClass() == byte.class) {
                 values.put(name, Byte.valueOf(String.valueOf(value)));
-            }
-            else if (value instanceof Boolean
-                    || value.getClass() == boolean.class)
-            {
+            } else if (value instanceof Boolean
+                    || value.getClass() == boolean.class) {
                 values.put(name, Boolean.valueOf(String.valueOf(value)));
-            }
-            else if (value instanceof byte[])
-            {
+            } else if (value instanceof byte[]) {
                 values.put(name, String.valueOf(value).getBytes());
-            }
-            else
-            {
+            } else {
                 // TODO: 2016/6/22 0022 处理其他数据类型
             }
         }
@@ -121,77 +100,55 @@ public final class TableUtil
      * @return ContentValues
      * @throws IllegalAccessException
      */
-    public static ContentValues getContentValuesWithOutID(Object object) throws IllegalAccessException
-    {
+    public static ContentValues getContentValuesWithOutID(Object object) throws IllegalAccessException {
         ContentValues values = new ContentValues();
         Class<?> clazz = object.getClass();
         Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields)
-        {
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
+                continue;
+            }
             ID id = field.getAnnotation(ID.class);
-            if (id != null)
-            {
+            if (id != null) {
                 continue;
             }
             String name = field.getName();
             field.setAccessible(true);
             Object value = field.get(object);
 
-            if (value == null)
-            {
+            if (value == null) {
                 continue;
             }
 
-            if (value instanceof String)
-            {
+            if (value instanceof String) {
                 values.put(name, String.valueOf(value));
-            }
-            else if (value instanceof Date)
-            {
+            } else if (value instanceof Date) {
                 String dateString = DateUtil.date2String((Date) value);
                 values.put(name, dateString);
-            }
-            else if (value instanceof Double
-                    || value.getClass() == double.class)
-            {
+            } else if (value instanceof Double
+                    || value.getClass() == double.class) {
                 values.put(name, Double.valueOf(String.valueOf(value)));
-            }
-            else if (value instanceof Float
-                    || value.getClass() == float.class)
-            {
+            } else if (value instanceof Float
+                    || value.getClass() == float.class) {
                 values.put(name, Float.valueOf(String.valueOf(value)));
-            }
-            else if (value instanceof Long
-                    || value.getClass() == long.class)
-            {
+            } else if (value instanceof Long
+                    || value.getClass() == long.class) {
                 values.put(name, Long.valueOf(String.valueOf(value)));
-            }
-            else if (value instanceof Integer
-                    || value.getClass() == int.class)
-            {
+            } else if (value instanceof Integer
+                    || value.getClass() == int.class) {
                 values.put(name, Integer.valueOf(String.valueOf(value)));
-            }
-            else if (value instanceof Short
-                    || value.getClass() == short.class)
-            {
+            } else if (value instanceof Short
+                    || value.getClass() == short.class) {
                 values.put(name, Short.valueOf(String.valueOf(value)));
-            }
-            else if (value instanceof Byte
-                    || value.getClass() == byte.class)
-            {
+            } else if (value instanceof Byte
+                    || value.getClass() == byte.class) {
                 values.put(name, Byte.valueOf(String.valueOf(value)));
-            }
-            else if (value instanceof Boolean
-                    || value.getClass() == boolean.class)
-            {
+            } else if (value instanceof Boolean
+                    || value.getClass() == boolean.class) {
                 values.put(name, Boolean.valueOf(String.valueOf(value)));
-            }
-            else if (value instanceof byte[])
-            {
+            } else if (value instanceof byte[]) {
                 values.put(name, String.valueOf(value).getBytes());
-            }
-            else
-            {
+            } else {
                 // TODO: 2016/6/22 0022 处理其他数据类型
             }
         }
@@ -204,8 +161,7 @@ public final class TableUtil
      * @param clazz 类
      * @return 字段的数据类型
      */
-    public static DataType getDataType(Class<?> clazz)
-    {
+    public static DataType getDataType(Class<?> clazz) {
         if (clazz == int.class
                 || clazz == Integer.class
                 || clazz == byte.class
@@ -216,20 +172,15 @@ public final class TableUtil
                 || clazz == Long.class
                 || clazz == Boolean.class
                 || clazz == boolean.class
-                )
-        {
+                ) {
             return DataType.INTEGER;
-        }
-        else if (clazz == float.class
+        } else if (clazz == float.class
                 || clazz == Float.class
                 || clazz == double.class
                 || clazz == Double.class
-                )
-        {
+                ) {
             return DataType.REAL;
-        }
-        else if (clazz == Date.class)
-        {
+        } else if (clazz == Date.class) {
             return DataType.DATE;
         }
         return DataType.TEXT;
@@ -237,28 +188,30 @@ public final class TableUtil
 
     /**
      * 获取id String
+     *
      * @param objectClass 类
      * @return id String
      * @throws IllegalAccessException
      */
-    public static String getId(Class objectClass) throws IllegalAccessException
-    {
+    public static String getId(Class objectClass) throws IllegalAccessException {
         Field[] fields = objectClass.getDeclaredFields();
         // 1. 从注解中抽取
-        for (Field field : fields)
-        {
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
+                continue;
+            }
             ID id = field.getAnnotation(ID.class);
-            if (id != null)
-            {
+            if (id != null) {
                 return "".equals(id.column()) ? field.getName() : id.column();
             }
         }
         // 2. 从field name 中抽取
-        for (Field field : fields)
-        {
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
+                continue;
+            }
             String name = field.getName();
-            if ("id".equals(name))
-            {
+            if ("id".equals(name)) {
                 return name;
             }
         }
@@ -272,16 +225,16 @@ public final class TableUtil
      * @return 属性（名字和值）
      * @throws IllegalAccessException
      */
-    public static KeyValue getIDColumn(Object object) throws IllegalAccessException
-    {
+    public static KeyValue getIDColumn(Object object) throws IllegalAccessException {
         Class objectClass = object.getClass();
         Field[] fields = objectClass.getDeclaredFields();
         // 1. 从注解中抽取
-        for (Field field : fields)
-        {
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
+                continue;
+            }
             ID id = field.getAnnotation(ID.class);
-            if (id != null)
-            {
+            if (id != null) {
                 String name = "".equals(id.column()) ? field.getName() : id.column();
                 field.setAccessible(true);
                 Object value = field.get(object);
@@ -292,11 +245,12 @@ public final class TableUtil
             }
         }
         // 2. 从field name 中抽取
-        for (Field field : fields)
-        {
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
+                continue;
+            }
             String name = field.getName();
-            if ("id".equals(name))
-            {
+            if ("id".equals(name)) {
                 field.setAccessible(true);
                 Object value = field.get(object);
                 KeyValue column = new KeyValue();

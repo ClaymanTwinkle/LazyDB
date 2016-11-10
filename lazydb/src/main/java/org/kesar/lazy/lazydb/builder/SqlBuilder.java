@@ -73,6 +73,10 @@ public final class SqlBuilder {
                 }
             }
         }
+        if(sb.charAt(sb.length()-1)==','){
+            // 莫名奇妙的错误serialVersionUID，待正常解决
+            sb.deleteCharAt(sb.length()-1);
+        }
         sb.append(")");
         String sql = sb.toString();
         // debug log
