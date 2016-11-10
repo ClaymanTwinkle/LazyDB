@@ -53,13 +53,13 @@ public class MainActivity extends AppCompatActivity {
             switch (requestCode) {
                 case AddTagActivity.REQUEST_CODE: {
                     Tag tag = (Tag) data.getSerializableExtra(Tag.class.getName());
-                    mAdapter.addAndRefresh(tag);
+                    mAdapter.addItemAndRefresh(0,tag);
                     break;
                 }
                 case EditTagActivity.REQUEST_CODE: {
                     int position = data.getIntExtra(EditTagActivity.Extra_Position, 0);
                     Tag tag = (Tag) data.getSerializableExtra(Tag.class.getName());
-                    mAdapter.setAndRefresh(position, tag);
+                    mAdapter.setItemAndRefresh(position, tag);
                     break;
                 }
             }
@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         });
         mAdapter.setOnItemLongClickListener(new ListAdapter.OnItemLongClickListener() {
             @Override
-            public void onLongItemClick(final int position, View view) {
+            public void onItemLongClick(final int position, View view) {
                 new AlertDialog.Builder(MainActivity.this)
                         .setMessage("确定要删除吗？")
                         .setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -92,8 +92,7 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
                                     mLazyDB.delete(mAdapter.getItem(position));
-                                    mAdapter.remove(position);
-                                    mAdapter.notifyItemRemoved(position);
+                                    mAdapter.removeItemAndRefresh(position);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -106,9 +105,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadData() {
         try {
-            List<Tag> tagList = mLazyDB.query(Tag.class).selectAll().execute();
-            mAdapter.setAllAndRefresh(tagList);
-            mAdapter.notifyDataSetChanged();
+            List<Tag> tagList = mLazyDB.query(Tag.class).selectAll().orderBy("time DESC").execute();
+            mAdapter.setAllItemsAndRefresh(tagList);
         } catch (InstantiationException | ParseException | IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
