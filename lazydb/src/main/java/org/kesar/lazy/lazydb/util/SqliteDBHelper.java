@@ -40,7 +40,7 @@ public class SqliteDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        DeBugLogger.d("onUpgrade DataBase from version " + oldVersion + " to " + newVersion);
+        DeBugLogger.d("onUpgrade","onUpgrade DataBase from version " + oldVersion + " to " + newVersion);
 
         if (mDbUpgradeListener != null) {
             mDbUpgradeListener.onUpgrade(db, oldVersion, newVersion);
@@ -63,7 +63,6 @@ public class SqliteDBHelper extends SQLiteOpenHelper {
             try {
                 while (cursor.moveToNext()) {
                     String sql = SqlBuilder.buildDropTableSql(cursor.getString(0));
-                    LogUtils.d("deleteAllTables",sql);
                     // 执行删除表的sql语句
                     db.execSQL(sql);
                 }
@@ -82,15 +81,15 @@ public class SqliteDBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         try {
             db.beginTransaction();
-            LogUtils.d("NoQuery","beginTransaction");
+            DeBugLogger.d("NoQuery","beginTransaction");
             if (operation != null) {
                 operation.onNoQuery(db);
             }
             db.setTransactionSuccessful();
-            LogUtils.d("NoQuery","transactionSuccessful");
+            DeBugLogger.d("NoQuery","transactionSuccessful");
         } finally {
             db.endTransaction();
-            LogUtils.d("NoQuery","endTransaction");
+            DeBugLogger.d("NoQuery","endTransaction");
         }
     }
 

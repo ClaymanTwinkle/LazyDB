@@ -80,7 +80,7 @@ public final class SqlBuilder {
         sb.append(")");
         String sql = sb.toString();
         // debug log
-        DeBugLogger.d(sql);
+        DeBugLogger.d("CreateTableSql",sql);
         return sql;
     }
 
@@ -131,7 +131,7 @@ public final class SqlBuilder {
 
         String sql = sb.toString();
         // debug log
-        DeBugLogger.d(sql);
+        DeBugLogger.d("CreateTableSql",sql);
         return sql;
     }
 
@@ -157,7 +157,7 @@ public final class SqlBuilder {
         sb.append(tableName);
         String sql = sb.toString();
         // debug log
-        DeBugLogger.d(sql);
+        DeBugLogger.d("DropTableSql",sql);
         return sql;
     }
 
@@ -169,7 +169,7 @@ public final class SqlBuilder {
     public static String buildQueryAllTableNamesSql() {
         String sql = SQL_Query_All_TABLE_Names;
         // debug log
-        DeBugLogger.d(sql);
+        DeBugLogger.d("QueryAllTableNamesSql",sql);
         return sql;
     }
 
@@ -181,7 +181,7 @@ public final class SqlBuilder {
     public static String buildQueryAllTableCountSql() {
         String sql = SQL_Query_All_TABLE_Count;
         // debug log
-        DeBugLogger.d(sql);
+        DeBugLogger.d("QueryAllTableCountSql",sql);
         return sql;
     }
 
@@ -194,7 +194,7 @@ public final class SqlBuilder {
     public static String buildQueryTableIsExistSql(Class<?> clazz) {
         String sql = buildQueryTableIsExistSql(TableUtil.getTableName(clazz));
         // debug log
-        DeBugLogger.d(sql);
+        DeBugLogger.d("QueryTableIsExistSql",sql);
         return sql;
     }
 
@@ -211,7 +211,7 @@ public final class SqlBuilder {
         sb.append("'");
         String sql = sb.toString();
         // debug log
-        DeBugLogger.d(sql);
+        DeBugLogger.d("QueryTableIsExistSql",sql);
         return sql;
     }
 
@@ -276,7 +276,7 @@ public final class SqlBuilder {
         }
         String sql = sb.toString();
         // debug log
-        DeBugLogger.d(sql);
+        DeBugLogger.d("QuerySql",sql);
         return sql;
     }
 

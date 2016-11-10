@@ -8,48 +8,68 @@ import android.util.Log;
  */
 public class DeBugLogger
 {
-    private static final String TAG = "LazyDB";
-    private static boolean isDebug = false;
+    private static boolean DEBUG = false;
 
     public static void setDebug(boolean isDebug)
     {
-        DeBugLogger.isDebug = isDebug;
+        DeBugLogger.DEBUG = isDebug;
     }
 
-    public static void d(String message)
-    {
-        if (isDebug)
-            Log.d(TAG, message);
+    private DeBugLogger() {
     }
 
-    public static void d(String TAG, String message)
-    {
-        if (isDebug)
-            Log.d(TAG, message);
+    public static void v(String tag, String msg) {
+        if (DEBUG)
+            Log.i(tag, msg);
     }
 
-    public static void w(String message)
-    {
-        if (isDebug)
-            Log.w(TAG, message);
+    public static void v(String tag, String msg, Throwable tr) {
+        if (DEBUG)
+            Log.i(tag, msg, tr);
     }
 
-    public static void w(String TAG, String message)
-    {
-        if (isDebug)
-            Log.w(TAG, message);
+    public static void d(String tag, String msg) {
+        if (DEBUG)
+            Log.i(tag, msg);
     }
 
-
-    public static void e(String message)
-    {
-        if (isDebug)
-            Log.e(TAG, message);
+    public static void d(String tag, String msg, Throwable tr) {
+        if (DEBUG)
+            Log.i(tag, msg, tr);
     }
 
-    public static void e(String TAG, String message)
-    {
-        if (isDebug)
-            Log.e(TAG, message);
+    public static void i(String tag, String msg) {
+        if (DEBUG)
+            Log.i(tag, msg);
+    }
+
+    public static void i(String tag, String msg, Throwable tr) {
+        if (DEBUG)
+            Log.i(tag, msg, tr);
+    }
+
+    public static void w(String tag, String msg) {
+        if (DEBUG)
+            Log.w(tag, msg);
+    }
+
+    public static void w(String tag, String msg, Throwable tr) {
+        if (DEBUG)
+            Log.w(tag, msg, tr);
+    }
+
+    public static void w(String tag, Throwable tr) {
+        if (DEBUG)
+            Log.w(tag,tr);
+    }
+
+    public static void e(String tag, String msg) {
+        if (DEBUG)
+            Log.e(tag, msg);
+    }
+
+    public static void e(String tag, String msg, Throwable tr) {
+        if (DEBUG)
+            Log.e(tag, msg, tr);
     }
 }

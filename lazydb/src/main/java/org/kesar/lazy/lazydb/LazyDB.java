@@ -10,9 +10,9 @@ import android.text.TextUtils;
 import org.kesar.lazy.lazydb.builder.SelectBuilder;
 import org.kesar.lazy.lazydb.builder.SqlBuilder;
 import org.kesar.lazy.lazydb.config.DBConfig;
+import org.kesar.lazy.lazydb.config.DeBugLogger;
 import org.kesar.lazy.lazydb.domain.ColumnInfo;
 import org.kesar.lazy.lazydb.util.KeyValue;
-import org.kesar.lazy.lazydb.util.LogUtils;
 import org.kesar.lazy.lazydb.util.ObjectUtil;
 import org.kesar.lazy.lazydb.util.SqliteDBHelper;
 import org.kesar.lazy.lazydb.util.TableUtil;
@@ -61,7 +61,7 @@ public final class LazyDB {
      */
     private LazyDB(DBConfig config) {
         this.helper = new SqliteDBHelper(config);
-        LogUtils.DEBUG=config.isDebug();
+        DeBugLogger.setDebug(config.isDebug());
     }
 
     /**
@@ -81,7 +81,6 @@ public final class LazyDB {
     public void createTable(Class<?> clazz) {
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = SqlBuilder.buildCreateTableSql(clazz);
-        LogUtils.d("createTable",sql);
         db.execSQL(sql);
     }
 
@@ -97,7 +96,6 @@ public final class LazyDB {
     public void createTable(String tableName, String idColumn, String idDataType, boolean isAutoIncrement, String... columns) {
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = SqlBuilder.buildCreateTableSql(tableName, idColumn, idDataType, isAutoIncrement, columns);
-        LogUtils.d("createTable",sql);
         db.execSQL(sql);
     }
 
@@ -112,7 +110,6 @@ public final class LazyDB {
             @Override
             public void onNoQuery(SQLiteDatabase db) throws Exception {
                 String sql = SqlBuilder.buildDropTableSql(clazz);
-                LogUtils.d("dropTable",sql);
                 db.execSQL(sql);
             }
         });
@@ -140,7 +137,6 @@ public final class LazyDB {
 
         SQLiteDatabase db = helper.getReadableDatabase();
         String sql = SqlBuilder.buildQueryAllTableNamesSql();
-        LogUtils.d("queryAllTableNamesSql",sql);
         Cursor cursor = db.rawQuery(sql, null);
         if (cursor != null) {
             try {
@@ -168,7 +164,6 @@ public final class LazyDB {
     public List<ColumnInfo> queryAllColumnsFromTable(Class<?> clazz) throws NoSuchFieldException, InstantiationException, ParseException, IllegalAccessException {
         List<ColumnInfo> columnInfos = new ArrayList<>();
         String sql = SqlBuilder.buildQueryTableInfoSql(clazz);
-        LogUtils.d("queryTableInfoSql",sql);
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.rawQuery(sql, null);
         if (cursor != null) {
@@ -202,7 +197,6 @@ public final class LazyDB {
      */
     public boolean isTableExist(String tableName) {
         String sql = SqlBuilder.buildQueryTableIsExistSql(tableName);
-        LogUtils.d("queryTableIsExistSql",sql);
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.rawQuery(sql, null);
         if (cursor != null) {
