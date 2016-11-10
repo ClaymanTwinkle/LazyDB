@@ -1,25 +1,28 @@
 package com.kesar.demo;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.kesar.demo.domain.Tag;
+import com.kesar.demo.util.SnackbarUtils;
 import com.kesar.lazy.recyclerview.CommonViewHolder;
 import com.kesar.lazy.recyclerview.ListAdapter;
 
 import org.kesar.lazy.lazydb.LazyDB;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -42,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         initView();
-        mLazyDB = LazyDB.create(getApplicationContext());
+        mLazyDB = LazyDBFactory.createDB(getApplicationContext());
         loadData();
     }
 
@@ -112,9 +115,41 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick(R.id.fab)
-    public void onClick(View view) {
-        startActivityForResult(new Intent(getApplicationContext(), AddTagActivity.class), AddTagActivity.REQUEST_CODE);
+    @OnClick({R.id.tvNewTag,R.id.tvMenu})
+    public void onClick(final View view) {
+        switch (view.getId()){
+            case R.id.tvNewTag:
+            {
+                startActivityForResult(new Intent(getApplicationContext(), AddTagActivity.class), AddTagActivity.REQUEST_CODE);
+                break;
+            }
+            case R.id.tvMenu:
+            {
+                List<String> items=new ArrayList<>();
+                items.add("我的收藏");
+                items.add("设置");
+                new AlertDialog.Builder(MainActivity.this)
+                        .setSingleChoiceItems(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items), -1, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which){
+                                    case 0:// TODO: 16-11-10 跳转到收藏界面
+                                    {
+
+                                        break;
+                                    }
+                                    case 1: // TODO: 16-11-10 跳转到设置界面
+                                    {
+
+                                        break;
+                                    }
+                                }
+                                dialog.dismiss();
+                            }
+                        }).show();
+                break;
+            }
+        }
     }
 
     static class TagAdapter extends ListAdapter<Tag, CommonViewHolder> {

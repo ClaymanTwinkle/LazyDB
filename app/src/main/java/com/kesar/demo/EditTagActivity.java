@@ -39,7 +39,7 @@ public class EditTagActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit_tag);
         ButterKnife.bind(this);
 
-        mLazyDB = LazyDB.create(getApplicationContext());
+        mLazyDB = LazyDBFactory.createDB(getApplicationContext());
         mTag = (Tag) getIntent().getSerializableExtra(Tag.class.getName());
         mPosition = getIntent().getIntExtra(Extra_Position, 0);
         initView();
@@ -64,7 +64,7 @@ public class EditTagActivity extends AppCompatActivity {
                     mLazyDB.update(mTag);
                     Intent data = new Intent();
                     data.putExtra(Extra_Position, mPosition);
-                    data.putExtra(Tag.class.getName(),mTag);
+                    data.putExtra(Tag.class.getName(), mTag);
                     setResult(RESULT_OK, data);
                     finish();
                 } catch (Exception e) {

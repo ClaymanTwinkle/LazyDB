@@ -9,10 +9,12 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.kesar.demo.domain.Tag;
 
 import org.kesar.lazy.lazydb.LazyDB;
+import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -33,6 +35,10 @@ public class AddTagActivity extends AppCompatActivity {
     Toolbar mToolbar;
     @BindView(R.id.etContent)
     EditText mEtContent;
+    @BindView(R.id.tvTime)
+    TextView mTvTime;
+
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,6 +48,8 @@ public class AddTagActivity extends AppCompatActivity {
 
         // mToolbar
         setSupportActionBar(mToolbar);
+
+        mTvTime.setText(simpleDateFormat.format(new Date()));
     }
 
     @OnClick({R.id.tvCancel, R.id.tvFinish})
@@ -58,13 +66,13 @@ public class AddTagActivity extends AppCompatActivity {
                     Tag tag = new Tag();
                     tag.setId(UUID.randomUUID().toString());
                     tag.setText(text);
-                    tag.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
+                    tag.setTime(simpleDateFormat.format(new Date()));
                     try {
-                        LazyDB lazyDB = LazyDB.create(getApplicationContext());
+                        LazyDB lazyDB = LazyDBFactory.createDB(getApplicationContext());
                         lazyDB.insert(tag);
-                        Intent intent=new Intent();
-                        intent.putExtra(Tag.class.getName(),tag);
-                        setResult(RESULT_OK,intent);
+                        Intent intent = new Intent();
+                        intent.putExtra(Tag.class.getName(), tag);
+                        setResult(RESULT_OK, intent);
                         finish();
                     } catch (Exception e) {
                         e.printStackTrace();

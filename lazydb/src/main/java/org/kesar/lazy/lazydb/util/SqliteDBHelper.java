@@ -62,9 +62,10 @@ public class SqliteDBHelper extends SQLiteOpenHelper {
         if (cursor != null) {
             try {
                 while (cursor.moveToNext()) {
-                    String dropTableSql = SqlBuilder.buildDropTableSql(cursor.getString(0));
+                    String sql = SqlBuilder.buildDropTableSql(cursor.getString(0));
+                    LogUtils.d("deleteAllTables",sql);
                     // 执行删除表的sql语句
-                    db.execSQL(dropTableSql);
+                    db.execSQL(sql);
                 }
             } finally {
                 cursor.close();
@@ -81,16 +82,19 @@ public class SqliteDBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         try {
             db.beginTransaction();
+            LogUtils.d("NoQuery","beginTransaction");
             if (operation != null) {
                 operation.onNoQuery(db);
             }
             db.setTransactionSuccessful();
+            LogUtils.d("NoQuery","transactionSuccessful");
         } finally {
             db.endTransaction();
+            LogUtils.d("NoQuery","endTransaction");
         }
     }
 
-    public static interface NoQueryOperation {
+    public interface NoQueryOperation {
         void onNoQuery(SQLiteDatabase db) throws Exception;
     }
 }

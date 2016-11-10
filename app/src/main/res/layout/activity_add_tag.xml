@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.kesar.demo.AddTagActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context="com.kesar.demo.AddTagActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
@@ -13,33 +13,46 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         app:popupTheme="@style/AppTheme.PopupOverlay">
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <TextView
                 android:id="@+id/tvCancel"
                 android:layout_width="?attr/actionBarSize"
                 android:layout_height="?attr/actionBarSize"
-                android:text="@string/cancel"
                 android:gravity="center"
-                />
+                android:text="@string/cancel"
+                android:textColor="@android:color/white" />
+
             <TextView
                 android:id="@+id/tvFinish"
                 android:layout_width="?attr/actionBarSize"
                 android:layout_height="?attr/actionBarSize"
-                android:text="@string/finish"
                 android:layout_alignParentRight="true"
-                android:gravity="center"
                 android:layout_marginRight="16dp"
-                />
+                android:gravity="center"
+                android:text="@string/finish"
+                android:textColor="@android:color/white" />
         </RelativeLayout>
     </android.support.v7.widget.Toolbar>
+
+    <TextView
+        android:id="@+id/tvTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:textSize="14sp" />
+
     <EditText
         android:id="@+id/etContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@null"
         android:gravity="top"
         android:padding="8dp"
-        android:background="@null"
-        />
+        android:textSize="17sp" />
 </LinearLayout>
