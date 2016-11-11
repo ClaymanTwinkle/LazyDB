@@ -16,4 +16,11 @@ public final class ReflectUtil
     public static Field[] getDeclaredFields(Class<?> clazz){
         return clazz.getDeclaredFields();
     }
+
+    public static Object getFieldValue(Field field,Object object) throws IllegalAccessException {
+        if(!field.isAccessible()){
+            field.setAccessible(true);
+        }
+        return field.get(object);
+    }
 }

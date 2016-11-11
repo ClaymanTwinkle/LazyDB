@@ -11,6 +11,7 @@ import java.util.Date;
 import static android.R.attr.id;
 import static android.R.attr.name;
 import static android.R.attr.readPermission;
+import static android.R.attr.value;
 
 /**
  * 数据库表操作工具类
@@ -52,13 +53,11 @@ public final class TableUtil {
             if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
                 continue;
             }
-            String name = field.getName();
-            field.setAccessible(true);
-            Object value = field.get(object);
-
+            Object value =ReflectUtil.getFieldValue(field,object);
             if (value == null) {
                 continue;
             }
+            String name = field.getName();
 
             if (value instanceof String) {
                 values.put(name, String.valueOf(value));
@@ -115,14 +114,13 @@ public final class TableUtil {
             if (id != null) {
                 continue;
             }
-            String name = field.getName();
-            field.setAccessible(true);
-            Object value = field.get(object);
 
+            Object value =ReflectUtil.getFieldValue(field,object);
             if (value == null) {
                 continue;
             }
 
+            String name = field.getName();
             if (value instanceof String) {
                 values.put(name, String.valueOf(value));
             } else if (value instanceof Date) {
@@ -229,8 +227,7 @@ public final class TableUtil {
             if (id != null&&!"".equals(id.column())) {
                 name = id.column();
             }
-            field.setAccessible(true);
-            Object value = field.get(object);
+            Object value =ReflectUtil.getFieldValue(field,object);
             KeyValue column = new KeyValue();
             column.setKey(name);
             column.setValue(value);

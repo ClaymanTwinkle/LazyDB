@@ -35,8 +35,9 @@ public final class ObjectUtil {
                 continue;
             }
             Class fieldClass = field.getType();
-            field.setAccessible(true);
-
+            if(!field.isAccessible()){
+                field.setAccessible(true);
+            }
             if (fieldClass == String.class) {
                 field.set(object, cursor.getString(i));
             } else if (fieldClass == double.class
@@ -69,6 +70,9 @@ public final class ObjectUtil {
             } else if (fieldClass == Date.class) {
                 String value = cursor.getString(i);
                 field.set(object, DateUtil.string2Date(value));
+            }
+            else{
+                // TODO: 16-11-11 这里如果不是基本类型的话，可以拓展到其他对象的递归构建，所以这个方法将不能放在这个类中
             }
         }
         return object;
