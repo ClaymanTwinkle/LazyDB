@@ -5,10 +5,14 @@ import android.text.TextUtils;
 import org.kesar.lazy.lazydb.annotate.ID;
 import org.kesar.lazy.lazydb.config.DeBugLogger;
 import org.kesar.lazy.lazydb.util.DataType;
+import org.kesar.lazy.lazydb.util.IDUtil;
+import org.kesar.lazy.lazydb.util.ReflectUtil;
 import org.kesar.lazy.lazydb.util.TableUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+
+import static android.R.attr.id;
 
 /**
  * sql语句生成
@@ -27,60 +31,49 @@ public final class SqlBuilder {
     public static String buildCreateTableSql(Class<?> clazz) {
         StringBuilder sb = new StringBuilder();
 
-        Field[] fields = clazz.getDeclaredFields();
+        Field[] fields = ReflectUtil.getDeclaredFields(clazz);
         checkClassFields(fields);
 
-        int commaCount = fields.length - 1; // 需要加的逗号个数
-
         // 开头
-        sb.append("create table ");
-        sb.append(TableUtil.getTableName(clazz)); // tableName
-        sb.append("(");
+        sb.append("create table ")
+                .append(TableUtil.getTableName(clazz)) // tableName
+                .append("(");
         // 找到主键
-        for (Field field : fields) {
-            // TODO: 2016/6/26 0026 这里的ID判断需要增加没有注解的情况
-            ID id = field.getAnnotation(ID.class);
-            if (id != null) {
-                String idColumn = "".equals(id.column()) ? field.getName() : id.column();
-                DataType dataType = TableUtil.getDataType(field.getType());
-
-                sb.append(idColumn);
-                sb.append(" ");
-                sb.append(dataType.toString());
-                sb.append(" primary key");
-                if (dataType == DataType.INTEGER) {
-                    sb.append(" autoincrement");
-                }
-                if (commaCount != 0) {
-                    commaCount--;
-                    sb.append(",");
-                }
+        Field idField = IDUtil.getIDField(fields);
+        if (idField != null) {
+            String idColumn = idField.getName();
+            ID id = idField.getAnnotation(ID.class);
+            // 判断是有没有注解的
+            if (id != null && !"".equals(id.column())) {
+                idColumn = id.column();
             }
+            DataType dataType = TableUtil.getDataType(idField.getType());
+            sb.append(idColumn)
+                    .append(" ")
+                    .append(dataType.toString())
+                    .append(" primary key")
+                    .append(",");
         }
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
-                commaCount--;
                 continue;
             }
-            ID id = field.getAnnotation(ID.class);
-            if (id == null) {
-                sb.append(field.getName());
-                sb.append(" ");
-                sb.append(TableUtil.getDataType(field.getType()));
-                if (commaCount != 0) {
-                    commaCount--;
-                    sb.append(",");
-                }
+            // 让不是id的field进来
+            if (field != idField) {
+                sb.append(field.getName())
+                        .append(" ")
+                        .append(TableUtil.getDataType(field.getType()))
+                        .append(",");
             }
         }
-        if(sb.charAt(sb.length()-1)==','){
-            // 莫名奇妙的错误serialVersionUID，待正常解决
-            sb.deleteCharAt(sb.length()-1);
+        // 除去最后一个逗号
+        if (sb.charAt(sb.length() - 1) == ',') {
+            sb.deleteCharAt(sb.length() - 1);
         }
         sb.append(")");
         String sql = sb.toString();
         // debug log
-        DeBugLogger.d("CreateTableSql",sql);
+        DeBugLogger.d("CreateTableSql", sql);
         return sql;
     }
 
@@ -97,16 +90,13 @@ public final class SqlBuilder {
     public static String buildCreateTableSql(String tableName, String idColumn, String idDataType, boolean isAutoIncrement, String... columns) {
         StringBuilder sb = new StringBuilder();
 
-        int commaCount = columns.length - 1; // 需要加的逗号个数
+        int commaCount = columns.length; // 需要加的逗号个数
 
         // 开头
-        sb.append("create table ");
-        sb.append(tableName);
-        sb.append("(");
+        sb.append("create table ").append(tableName).append("(");
         // 找到主键
         if (idColumn != null) {
-            sb.append(idColumn);
-            sb.append(" ");
+            sb.append(idColumn).append(" ");
             if (idDataType != null) {
                 sb.append(idDataType);
             }
@@ -118,6 +108,8 @@ public final class SqlBuilder {
                 commaCount--;
                 sb.append(",");
             }
+        } else {
+            commaCount--;
         }
         // 处理其他元素
         for (String f : columns) {
@@ -131,7 +123,7 @@ public final class SqlBuilder {
 
         String sql = sb.toString();
         // debug log
-        DeBugLogger.d("CreateTableSql",sql);
+        DeBugLogger.d("CreateTableSql", sql);
         return sql;
     }
 
@@ -152,12 +144,10 @@ public final class SqlBuilder {
      * @return 删除表的sql语句
      */
     public static String buildDropTableSql(String tableName) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("drop table if exists ");
-        sb.append(tableName);
-        String sql = sb.toString();
+        String sql = "drop table if exists "
+                + tableName;
         // debug log
-        DeBugLogger.d("DropTableSql",sql);
+        DeBugLogger.d("DropTableSql", sql);
         return sql;
     }
 
@@ -169,7 +159,7 @@ public final class SqlBuilder {
     public static String buildQueryAllTableNamesSql() {
         String sql = SQL_Query_All_TABLE_Names;
         // debug log
-        DeBugLogger.d("QueryAllTableNamesSql",sql);
+        DeBugLogger.d("QueryAllTableNamesSql", sql);
         return sql;
     }
 
@@ -181,7 +171,7 @@ public final class SqlBuilder {
     public static String buildQueryAllTableCountSql() {
         String sql = SQL_Query_All_TABLE_Count;
         // debug log
-        DeBugLogger.d("QueryAllTableCountSql",sql);
+        DeBugLogger.d("QueryAllTableCountSql", sql);
         return sql;
     }
 
@@ -194,7 +184,7 @@ public final class SqlBuilder {
     public static String buildQueryTableIsExistSql(Class<?> clazz) {
         String sql = buildQueryTableIsExistSql(TableUtil.getTableName(clazz));
         // debug log
-        DeBugLogger.d("QueryTableIsExistSql",sql);
+        DeBugLogger.d("QueryTableIsExistSql", sql);
         return sql;
     }
 
@@ -205,13 +195,12 @@ public final class SqlBuilder {
      * @return 判断表是否存在的sql语句
      */
     public static String buildQueryTableIsExistSql(String tableName) {
-        StringBuilder sb = new StringBuilder(buildQueryAllTableCountSql());
-        sb.append(" AND name='");
-        sb.append(tableName);
-        sb.append("'");
-        String sql = sb.toString();
+        String sql = buildQueryAllTableCountSql()
+                + " AND name='"
+                + tableName
+                + "'";
         // debug log
-        DeBugLogger.d("QueryTableIsExistSql",sql);
+        DeBugLogger.d("QueryTableIsExistSql", sql);
         return sql;
     }
 
@@ -245,9 +234,8 @@ public final class SqlBuilder {
                 }
             }
         }
-        sb.append(" from '");
-        sb.append(table);
-        sb.append("'");
+        sb.append(" from '").append(table).append("'");
+
         if (!TextUtils.isEmpty(selection)) {
             String whereStr = selection;
             if (selectionArgs != null) {
@@ -255,33 +243,29 @@ public final class SqlBuilder {
                     whereStr = whereStr.replaceFirst("\\?", arg);
                 }
             }
-            sb.append(" where ");
-            sb.append(whereStr);
+            sb.append(" where ").append(whereStr);
         }
         if (!TextUtils.isEmpty(groupBy)) {
-            sb.append(" group by ");
-            sb.append(groupBy);
+            sb.append(" group by ").append(groupBy);
         }
         if (!TextUtils.isEmpty(having)) {
-            sb.append(" having ");
-            sb.append(having);
+            sb.append(" having ").append(having);
         }
         if (!TextUtils.isEmpty(orderBy)) {
-            sb.append(" order by ");
-            sb.append(orderBy);
+            sb.append(" order by ").append(orderBy);
         }
         if (!TextUtils.isEmpty(limit)) {
-            sb.append(" limit ");
-            sb.append(limit);
+            sb.append(" limit ").append(limit);
         }
         String sql = sb.toString();
         // debug log
-        DeBugLogger.d("QuerySql",sql);
+        DeBugLogger.d("QuerySql", sql);
         return sql;
     }
 
     /**
      * 构建查询表中属性的sql
+     *
      * @param clazz class
      * @return sql
      */

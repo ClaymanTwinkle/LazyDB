@@ -8,7 +8,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Date;
 
+import static android.R.attr.id;
 import static android.R.attr.name;
+import static android.R.attr.readPermission;
 
 /**
  * 数据库表操作工具类
@@ -45,7 +47,7 @@ public final class TableUtil {
     public static ContentValues getContentValues(Object object) throws IllegalAccessException {
         ContentValues values = new ContentValues();
         Class<?> clazz = object.getClass();
-        Field[] fields = clazz.getDeclaredFields();
+        Field[] fields = ReflectUtil.getDeclaredFields(clazz);
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
                 continue;
@@ -87,7 +89,8 @@ public final class TableUtil {
             } else if (value instanceof byte[]) {
                 values.put(name, String.valueOf(value).getBytes());
             } else {
-                // TODO: 2016/6/22 0022 处理其他数据类型
+                // 处理其他数据类型, 只能也用string了
+                values.put(name, String.valueOf(value));
             }
         }
         return values;
@@ -103,7 +106,7 @@ public final class TableUtil {
     public static ContentValues getContentValuesWithOutID(Object object) throws IllegalAccessException {
         ContentValues values = new ContentValues();
         Class<?> clazz = object.getClass();
-        Field[] fields = clazz.getDeclaredFields();
+        Field[] fields = ReflectUtil.getDeclaredFields(clazz);
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
                 continue;
@@ -149,7 +152,8 @@ public final class TableUtil {
             } else if (value instanceof byte[]) {
                 values.put(name, String.valueOf(value).getBytes());
             } else {
-                // TODO: 2016/6/22 0022 处理其他数据类型
+                // 处理其他数据类型, 只能也用string了
+                values.put(name, String.valueOf(value));
             }
         }
         return values;
@@ -193,29 +197,17 @@ public final class TableUtil {
      * @return id String
      * @throws IllegalAccessException
      */
-    public static String getId(Class objectClass) throws IllegalAccessException {
-        Field[] fields = objectClass.getDeclaredFields();
-        // 1. 从注解中抽取
-        for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
-                continue;
-            }
+    public static String getIdName(Class objectClass) throws IllegalAccessException {
+        String name=null;
+        Field field=IDUtil.getIDField(objectClass);
+        if(field!=null){
+            name=field.getName();
             ID id = field.getAnnotation(ID.class);
-            if (id != null) {
-                return "".equals(id.column()) ? field.getName() : id.column();
+            if(id!=null&&!"".equals(id.column())){
+                name = id.column();
             }
         }
-        // 2. 从field name 中抽取
-        for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
-                continue;
-            }
-            String name = field.getName();
-            if ("id".equals(name)) {
-                return name;
-            }
-        }
-        return null;
+        return name;
     }
 
     /**
@@ -227,37 +219,22 @@ public final class TableUtil {
      */
     public static KeyValue getIDColumn(Object object) throws IllegalAccessException {
         Class objectClass = object.getClass();
-        Field[] fields = objectClass.getDeclaredFields();
-        // 1. 从注解中抽取
-        for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
-                continue;
-            }
+        Field[] fields = ReflectUtil.getDeclaredFields(objectClass);
+        Field field=IDUtil.getIDField(fields);
+        // 1. 判断null
+        if(field!=null){
             ID id = field.getAnnotation(ID.class);
-            if (id != null) {
-                String name = "".equals(id.column()) ? field.getName() : id.column();
-                field.setAccessible(true);
-                Object value = field.get(object);
-                KeyValue column = new KeyValue();
-                column.setKey(name);
-                column.setValue(value);
-                return column;
-            }
-        }
-        // 2. 从field name 中抽取
-        for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
-                continue;
-            }
             String name = field.getName();
-            if ("id".equals(name)) {
-                field.setAccessible(true);
-                Object value = field.get(object);
-                KeyValue column = new KeyValue();
-                column.setKey(name);
-                column.setValue(value);
-                return column;
+            // 判断是否有ID Annotation
+            if (id != null&&!"".equals(id.column())) {
+                name = id.column();
             }
+            field.setAccessible(true);
+            Object value = field.get(object);
+            KeyValue column = new KeyValue();
+            column.setKey(name);
+            column.setValue(value);
+            return column;
         }
         return null;
     }

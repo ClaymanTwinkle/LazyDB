@@ -9,6 +9,7 @@ import java.io.Serializable;
  * Created by kesar on 16-10-28.
  */
 public class Tag implements Serializable{
+
     @ID
     private String id;
     private String text;

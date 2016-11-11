@@ -438,25 +438,25 @@ public final class LazyDB {
      * 通过id查询
      *
      * @param clazz 类
-     * @param id    id
+     * @param idValue    idValue
      * @return object
      * @throws NoSuchFieldException
      * @throws InstantiationException
      * @throws ParseException
      * @throws IllegalAccessException
      */
-    public <T> T queryById(Class<T> clazz, Object id) throws Exception {
+    public <T> T queryById(Class<T> clazz, Object idValue) throws Exception {
         T object = null;
         String tableName = TableUtil.getTableName(clazz);
         if (isTableExist(tableName)) {
-            String idName = TableUtil.getId(clazz);
+            String idName = TableUtil.getIdName(clazz);
             // 如果id不存在
             if (TextUtils.isEmpty(idName)) {
                 throw new IllegalStateException("object have to have a id column!");
             }
 
             SQLiteDatabase db = helper.getReadableDatabase();
-            Cursor cursor = db.query(tableName, null, idName + "=?", new String[]{id.toString()}, null, null, null);
+            Cursor cursor = db.query(tableName, null, idName + "=?", new String[]{idValue.toString()}, null, null, null);
             if (cursor != null) {
                 try {
                     while (cursor.moveToNext()) {
