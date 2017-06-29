@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 
-import org.kesar.lazy.lazydb.builder.SqlBuilder;
 import org.kesar.lazy.lazydb.config.DBConfig;
 import org.kesar.lazy.lazydb.config.DeBugLogger;
 
@@ -16,20 +15,20 @@ import org.kesar.lazy.lazydb.config.DeBugLogger;
  * SQLiteOpenHelper实现类
  * Created by kesar on 2016/6/21 0021.
  */
-public class SqliteDBHelper extends SQLiteOpenHelper {
+public class SQLiteDBHelper extends SQLiteOpenHelper {
     private DBConfig.DBUpgradeListener mDbUpgradeListener;
 
-    public SqliteDBHelper(DBConfig config) {
+    public SQLiteDBHelper(DBConfig config) {
         super(config.getContext(), config.getDBName(), null, config.getDBVersion());
         this.mDbUpgradeListener = config.getUpgradeListener();
     }
 
-    public SqliteDBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+    public SQLiteDBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public SqliteDBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version, DatabaseErrorHandler errorHandler) {
+    public SQLiteDBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version, DatabaseErrorHandler errorHandler) {
         super(context, name, factory, version, errorHandler);
     }
 
@@ -55,13 +54,13 @@ public class SqliteDBHelper extends SQLiteOpenHelper {
      * @param db
      */
     public void deleteAllTables(SQLiteDatabase db) {
-        String queryAllTableNameSql = SqlBuilder.buildQueryAllTableNamesSql();
+        String queryAllTableNameSql = SQLBuilder.buildQueryAllTableNamesSql();
 
         Cursor cursor = db.rawQuery(queryAllTableNameSql, null);
         if (cursor != null) {
             try {
                 while (cursor.moveToNext()) {
-                    String sql = SqlBuilder.buildDropTableSql(cursor.getString(0));
+                    String sql = SQLBuilder.buildDropTableSql(cursor.getString(0));
                     // 执行删除表的sql语句
                     db.execSQL(sql);
                 }
@@ -69,30 +68,5 @@ public class SqliteDBHelper extends SQLiteOpenHelper {
                 cursor.close();
             }
         }
-    }
-
-    /**
-     * 执行非查询操作事物
-     *
-     * @param operation 非查询操作
-     */
-    public void executeNoQueryTransaction(NoQueryOperation operation) throws Exception {
-        SQLiteDatabase db = this.getWritableDatabase();
-        try {
-            db.beginTransaction();
-            DeBugLogger.d("NoQuery","beginTransaction");
-            if (operation != null) {
-                operation.onNoQuery(db);
-            }
-            db.setTransactionSuccessful();
-            DeBugLogger.d("NoQuery","transactionSuccessful");
-        } finally {
-            db.endTransaction();
-            DeBugLogger.d("NoQuery","endTransaction");
-        }
-    }
-
-    public interface NoQueryOperation {
-        void onNoQuery(SQLiteDatabase db) throws Exception;
     }
 }

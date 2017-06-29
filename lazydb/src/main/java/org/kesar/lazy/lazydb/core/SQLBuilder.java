@@ -1,4 +1,4 @@
-package org.kesar.lazy.lazydb.builder;
+package org.kesar.lazy.lazydb.core;
 
 import android.text.TextUtils;
 
@@ -16,7 +16,7 @@ import java.lang.reflect.Modifier;
  * sql语句生成
  * Created by kesar on 2016/6/21 0021.
  */
-public final class SqlBuilder {
+public final class SQLBuilder {
     private final static String SQL_Query_All_TABLE_Names = "select name from sqlite_master where type='table' AND name!='sqlite_sequence' AND name!='android_metadata'"; // 查询所有表名的sql语句
     private final static String SQL_Query_All_TABLE_Count = "select count(*) from sqlite_master where type='table' AND name!='sqlite_sequence' AND name!='android_metadata'";
 

@@ -1,24 +1,21 @@
 package org.kesar.lazy.lazydb;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import org.kesar.lazy.lazydb.builder.SelectBuilder;
-import org.kesar.lazy.lazydb.builder.SqlBuilder;
 import org.kesar.lazy.lazydb.config.DBConfig;
 import org.kesar.lazy.lazydb.config.DeBugLogger;
+import org.kesar.lazy.lazydb.core.SQLBuilder;
+import org.kesar.lazy.lazydb.core.SQLiteDBExecutor;
+import org.kesar.lazy.lazydb.core.SQLiteDBHelper;
+import org.kesar.lazy.lazydb.core.SelectBuilder;
 import org.kesar.lazy.lazydb.domain.ColumnInfo;
 import org.kesar.lazy.lazydb.domain.KeyValue;
-import org.kesar.lazy.lazydb.util.ObjectUtil;
-import org.kesar.lazy.lazydb.core.SqliteDBHelper;
 import org.kesar.lazy.lazydb.util.TableUtil;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,7 +30,7 @@ public final class LazyDB {
     private LazyDB() {
     }
 
-    private SqliteDBHelper helper;
+    private SQLiteDBExecutor executor;
 
     /**
      * 创建默认配置的数据库
@@ -43,7 +40,6 @@ public final class LazyDB {
     public static LazyDB create(Context context) {
         return create(DBConfig.getDefaultConfig(context));
     }
-
 
     /**
      * 创建自定义配置的数据库
@@ -60,17 +56,9 @@ public final class LazyDB {
      * @param config 数据库配置文件
      */
     private LazyDB(DBConfig config) {
-        this.helper = new SqliteDBHelper(config);
+        SQLiteDBHelper helper = new SQLiteDBHelper(config);
+        executor = new SQLiteDBExecutor(helper);
         DeBugLogger.setDebug(config.isDebug());
-    }
-
-    /**
-     * SQLiteOpenHelper
-     *
-     * @return SQLiteOpenHelper
-     */
-    public SqliteDBHelper getHelper() {
-        return helper;
     }
 
     /**
@@ -79,9 +67,8 @@ public final class LazyDB {
      * @param clazz 类
      */
     public void createTable(Class<?> clazz) {
-        SQLiteDatabase db = helper.getWritableDatabase();
-        String sql = SqlBuilder.buildCreateTableSql(clazz);
-        db.execSQL(sql);
+        String sql = SQLBuilder.buildCreateTableSql(clazz);
+        executor.createTable(sql);
     }
 
     /**
@@ -94,9 +81,8 @@ public final class LazyDB {
      * @param columns         其他列名，不包括id
      */
     public void createTable(String tableName, String idColumn, String idDataType, boolean isAutoIncrement, String... columns) {
-        SQLiteDatabase db = helper.getWritableDatabase();
-        String sql = SqlBuilder.buildCreateTableSql(tableName, idColumn, idDataType, isAutoIncrement, columns);
-        db.execSQL(sql);
+        String sql = SQLBuilder.buildCreateTableSql(tableName, idColumn, idDataType, isAutoIncrement, columns);
+        executor.createTable(sql);
     }
 
 
@@ -106,25 +92,15 @@ public final class LazyDB {
      * @param clazz 类
      */
     public void dropTable(final Class<?> clazz) throws Exception {
-        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
-            @Override
-            public void onNoQuery(SQLiteDatabase db) throws Exception {
-                String sql = SqlBuilder.buildDropTableSql(clazz);
-                db.execSQL(sql);
-            }
-        });
+        String sql = SQLBuilder.buildDropTableSql(clazz);
+        executor.dropTable(sql);
     }
 
     /**
      * 删除数据库中所有的表
      */
     public void dropAllTables() throws Exception {
-        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
-            @Override
-            public void onNoQuery(SQLiteDatabase db) throws Exception {
-                helper.deleteAllTables(db);
-            }
-        });
+        executor.dropAllTables();
     }
 
     /**
@@ -133,21 +109,8 @@ public final class LazyDB {
      * @return 所有表名的集合；若没有表，则是空集合
      */
     public List<String> queryAllTableNames() {
-        List<String> tableNames = new ArrayList<>();
-
-        SQLiteDatabase db = helper.getReadableDatabase();
-        String sql = SqlBuilder.buildQueryAllTableNamesSql();
-        Cursor cursor = db.rawQuery(sql, null);
-        if (cursor != null) {
-            try {
-                while (cursor.moveToNext()) {
-                    tableNames.add(cursor.getString(0));
-                }
-            } finally {
-                cursor.close();
-            }
-        }
-        return tableNames;
+        String sql = SQLBuilder.buildQueryAllTableNamesSql();
+        return executor.queryAllTableNames(sql);
     }
 
 
@@ -162,21 +125,8 @@ public final class LazyDB {
      * @throws IllegalAccessException
      */
     public List<ColumnInfo> queryAllColumnsFromTable(Class<?> clazz) throws NoSuchFieldException, InstantiationException, ParseException, IllegalAccessException {
-        List<ColumnInfo> columnInfos = new ArrayList<>();
-        String sql = SqlBuilder.buildQueryTableInfoSql(clazz);
-        SQLiteDatabase db = helper.getReadableDatabase();
-        Cursor cursor = db.rawQuery(sql, null);
-        if (cursor != null) {
-            try {
-                while (cursor.moveToNext()) {
-                    ColumnInfo columnInfo = ObjectUtil.buildObject(ColumnInfo.class, cursor);
-                    columnInfos.add(columnInfo);
-                }
-            } finally {
-                cursor.close();
-            }
-        }
-        return columnInfos;
+        String sql = SQLBuilder.buildQueryTableInfoSql(clazz);
+        return executor.queryAllColumnsFromTable(sql);
     }
 
     /**
@@ -196,21 +146,8 @@ public final class LazyDB {
      * @return true 表存在，false 表不存在
      */
     public boolean isTableExist(String tableName) {
-        String sql = SqlBuilder.buildQueryTableIsExistSql(tableName);
-        SQLiteDatabase db = helper.getReadableDatabase();
-        Cursor cursor = db.rawQuery(sql, null);
-        if (cursor != null) {
-            try {
-                if (cursor.moveToNext()) {
-                    if (cursor.getInt(0) != 0) {
-                        return true;
-                    }
-                }
-            } finally {
-                cursor.close();
-            }
-        }
-        return false;
+        String sql = SQLBuilder.buildQueryTableIsExistSql(tableName);
+        return executor.isTableExist(sql);
     }
 
     /**
@@ -222,13 +159,17 @@ public final class LazyDB {
      */
     public boolean isObjectExist(Object object) throws IllegalAccessException {
         // 如果表存在
-        if (isTableExist(object.getClass())) {
-            KeyValue keyValue = TableUtil.getIDColumn(object);
-            if (keyValue == null) {
+        Class<?> clazz = object.getClass();
+        if (isTableExist(clazz)) {
+            KeyValue idColumn = TableUtil.getIDColumn(object);
+            if (idColumn == null) {
                 return false;
             }
-            SQLiteDatabase db = helper.getReadableDatabase();
-            Cursor cursor = db.query(TableUtil.getTableName(object.getClass()), new String[]{"count(*)"}, keyValue.getKey() + "=?", new String[]{keyValue.getValue().toString()}, null, null, null);
+
+            Cursor cursor = query(clazz)
+                    .select("count(*)")
+                    .where(idColumn.getKey() + "=?", new String[]{idColumn.getValue().toString()})
+                    .executeNative();
             if (cursor != null) {
                 try {
                     if (cursor.moveToNext()) {
@@ -249,20 +190,15 @@ public final class LazyDB {
      *
      * @param object 对象
      */
-    public void insert(@NonNull final Object object) throws Exception {
+    public void insert(@NonNull Object object) throws Exception {
         final Class<?> clazz = object.getClass();
         // 表不存在，创建表
         if (!isTableExist(clazz)) {
             // 创建表
             createTable(clazz);
         }
-        // 插入表
-        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
-            @Override
-            public void onNoQuery(SQLiteDatabase db) throws Exception {
-                db.insert(TableUtil.getTableName(clazz), null, TableUtil.getContentValues(object));
-            }
-        });
+
+        executor.insert(object);
     }
 
     /**
@@ -282,15 +218,8 @@ public final class LazyDB {
             // 创建表
             createTable(clazz);
         }
-        // 插入表
-        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
-            @Override
-            public void onNoQuery(SQLiteDatabase db) throws Exception {
-                for (Object object : objectList) {
-                    db.insert(TableUtil.getTableName(clazz), null, TableUtil.getContentValues(object));
-                }
-            }
-        });
+
+        executor.insert(objectList);
     }
 
     /**
@@ -300,25 +229,7 @@ public final class LazyDB {
      * @throws IllegalAccessException
      */
     public void update(@NonNull final Object object) throws Exception {
-        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
-            @Override
-            public void onNoQuery(SQLiteDatabase db) throws Exception {
-                // 根据id更新object
-                KeyValue idColumn = TableUtil.getIDColumn(object);
-                if (null == idColumn) {
-                    throw new IllegalStateException("Object does not include the id field");
-                }
-                if (null == idColumn.getValue()) {
-                    throw new IllegalStateException("The value of the id field cannot be null");
-                }
-                String tableName = TableUtil.getTableName(object);
-                ContentValues values = TableUtil.getContentValuesWithOutID(object);
-                String whereClause = idColumn.getKey() + "=?";
-                String[] whereArgs = new String[]{idColumn.getValue().toString()};
-
-                db.update(tableName, values, whereClause, whereArgs);
-            }
-        });
+        executor.update(object);
     }
 
     /**
@@ -347,24 +258,7 @@ public final class LazyDB {
         if (!isTableExist(object.getClass())) {
             return;
         }
-        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
-            @Override
-            public void onNoQuery(SQLiteDatabase db) throws Exception {
-                KeyValue column = TableUtil.getIDColumn(object);
-                if (null == column) {
-                    throw new IllegalStateException("Object does not include the id field");
-                }
-                if (null == column.getValue()) {
-                    throw new IllegalStateException("The value of the id field cannot be null");
-                }
-
-                String tableName = TableUtil.getTableName(object);
-                String whereClause = column.getKey() + "=?";
-                String[] whereArgs = new String[]{column.getValue().toString()};
-                // 根据id删除object
-                db.delete(tableName, whereClause, whereArgs);
-            }
-        });
+        executor.delete(object);
     }
 
     /**
@@ -383,25 +277,7 @@ public final class LazyDB {
         if (!isTableExist(clazz)) {
             return;
         }
-        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
-            @Override
-            public void onNoQuery(SQLiteDatabase db) throws Exception {
-                for (Object object : objectList) {
-                    KeyValue column = TableUtil.getIDColumn(object);
-                    if (null == column) {
-                        throw new IllegalStateException("Object does not include the id field");
-                    }
-                    if (null == column.getValue()) {
-                        throw new IllegalStateException("The value of the id field cannot be null");
-                    }
-                    String tableName = TableUtil.getTableName(object);
-                    String whereClause = column.getKey() + "=?";
-                    String[] whereArgs = new String[]{column.getValue().toString()};
-                    // 根据id删除object
-                    db.delete(tableName, whereClause, whereArgs);
-                }
-            }
-        });
+        executor.delete(objectList);
     }
 
     /**
@@ -416,12 +292,7 @@ public final class LazyDB {
         if (!isTableExist(clazz)) {
             return;
         }
-        helper.executeNoQueryTransaction(new SqliteDBHelper.NoQueryOperation() {
-            @Override
-            public void onNoQuery(SQLiteDatabase db) {
-                db.delete(TableUtil.getTableName(clazz), whereClause, whereArgs);
-            }
-        });
+        executor.delete(clazz, whereClause, whereArgs);
     }
 
     /**
@@ -431,14 +302,14 @@ public final class LazyDB {
      * @return select操作的构建器
      */
     public <T> SelectBuilder<T> query(Class<T> clazz) {
-        return new SelectBuilder<>(helper, clazz);
+        return executor.query(clazz);
     }
 
     /**
      * 通过id查询
      *
-     * @param clazz 类
-     * @param idValue    idValue
+     * @param clazz   类
+     * @param idValue idValue
      * @return object
      * @throws NoSuchFieldException
      * @throws InstantiationException
@@ -455,16 +326,12 @@ public final class LazyDB {
                 throw new IllegalStateException("object have to have a id column!");
             }
 
-            SQLiteDatabase db = helper.getReadableDatabase();
-            Cursor cursor = db.query(tableName, null, idName + "=?", new String[]{idValue.toString()}, null, null, null);
-            if (cursor != null) {
-                try {
-                    while (cursor.moveToNext()) {
-                        object = ObjectUtil.buildObject(clazz, cursor);
-                    }
-                } finally {
-                    cursor.close();
-                }
+            List<T> resultList = executor.query(clazz)
+                    .selectAll()
+                    .where(idName + "=?", new String[]{idValue.toString()})
+                    .execute();
+            if (!resultList.isEmpty()) {
+                object = resultList.get(0);
             }
         }
         return object;

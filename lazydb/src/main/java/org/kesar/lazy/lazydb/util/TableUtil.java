@@ -50,7 +50,7 @@ public final class TableUtil {
             if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
                 continue;
             }
-            Object value =ReflectUtil.getFieldValue(field,object);
+            Object value = ReflectUtil.getFieldValue(field, object);
             if (value == null) {
                 continue;
             }
@@ -112,7 +112,7 @@ public final class TableUtil {
                 continue;
             }
 
-            Object value =ReflectUtil.getFieldValue(field,object);
+            Object value = ReflectUtil.getFieldValue(field, object);
             if (value == null) {
                 continue;
             }
@@ -196,12 +196,12 @@ public final class TableUtil {
      * @throws IllegalAccessException
      */
     public static String getIdName(Class objectClass) throws IllegalAccessException {
-        String name=null;
-        Field field=IDUtil.getIDField(objectClass);
-        if(field!=null){
-            name=field.getName();
+        String name = null;
+        Field field = IDUtil.getIDField(objectClass);
+        if (field != null) {
+            name = field.getName();
             ID id = field.getAnnotation(ID.class);
-            if(id!=null&&!"".equals(id.column())){
+            if (id != null && !"".equals(id.column())) {
                 name = id.column();
             }
         }
@@ -218,16 +218,16 @@ public final class TableUtil {
     public static KeyValue getIDColumn(Object object) throws IllegalAccessException {
         Class objectClass = object.getClass();
         Field[] fields = ReflectUtil.getDeclaredFields(objectClass);
-        Field field=IDUtil.getIDField(fields);
+        Field field = IDUtil.getIDField(fields);
         // 1. 判断null
-        if(field!=null){
+        if (field != null) {
             ID id = field.getAnnotation(ID.class);
             String name = field.getName();
             // 判断是否有ID Annotation
-            if (id != null&&!"".equals(id.column())) {
+            if (id != null && !"".equals(id.column())) {
                 name = id.column();
             }
-            Object value =ReflectUtil.getFieldValue(field,object);
+            Object value = ReflectUtil.getFieldValue(field, object);
             KeyValue column = new KeyValue();
             column.setKey(name);
             column.setValue(value);
