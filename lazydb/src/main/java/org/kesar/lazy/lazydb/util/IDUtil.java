@@ -1,6 +1,7 @@
 package org.kesar.lazy.lazydb.util;
 
 import org.kesar.lazy.lazydb.annotate.ID;
+import org.kesar.lazy.lazydb.domain.KeyValue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -59,5 +60,53 @@ public class IDUtil {
             }
         }
         return idField;
+    }
+
+    /**
+     * 获取id String
+     *
+     * @param objectClass 类
+     * @return id String
+     * @throws IllegalAccessException
+     */
+    public static String getIdName(Class objectClass) throws IllegalAccessException {
+        String name = null;
+        Field field = IDUtil.getIDField(objectClass);
+        if (field != null) {
+            name = field.getName();
+            ID id = field.getAnnotation(ID.class);
+            if (id != null && !"".equals(id.column())) {
+                name = id.column();
+            }
+        }
+        return name;
+    }
+
+    /**
+     * 获取id的属性名和属性值
+     *
+     * @param object 对象
+     * @return 属性（名字和值）
+     * @throws IllegalAccessException
+     */
+    public static KeyValue getIDColumn(Object object) throws IllegalAccessException {
+        Class objectClass = object.getClass();
+        Field[] fields = ReflectUtil.getDeclaredFields(objectClass);
+        Field field = IDUtil.getIDField(fields);
+        // 1. 判断null
+        if (field != null) {
+            ID id = field.getAnnotation(ID.class);
+            String name = field.getName();
+            // 判断是否有ID Annotation
+            if (id != null && !"".equals(id.column())) {
+                name = id.column();
+            }
+            Object value = ReflectUtil.getFieldValue(field, object);
+            KeyValue column = new KeyValue();
+            column.setKey(name);
+            column.setValue(value);
+            return column;
+        }
+        return null;
     }
 }

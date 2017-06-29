@@ -15,7 +15,6 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.kesar.demo.domain.Tag;
-import com.kesar.demo.util.SnackbarUtils;
 import com.kesar.lazy.recyclerview.CommonViewHolder;
 import com.kesar.lazy.recyclerview.ListAdapter;
 
@@ -108,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadData() {
         try {
-            List<Tag> tagList = mLazyDB.query(Tag.class).selectAll().orderBy("time DESC").execute();
+            List<Tag> tagList = mLazyDB.query(Tag.class).selectAll().orderBy("time DESC").findAll();
             mAdapter.setAllItemsAndRefresh(tagList);
         } catch (InstantiationException | ParseException | IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();

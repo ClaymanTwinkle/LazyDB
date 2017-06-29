@@ -39,7 +39,7 @@ public class SelectBuilder<T> {
         return this;
     }
 
-    public SelectBuilder<T> where(String whereSection, String[] whereArgs) {
+    public SelectBuilder<T> where(String whereSection, String... whereArgs) {
         this.whereSection = whereSection;
         this.whereArgs = whereArgs;
         return this;
@@ -109,7 +109,7 @@ public class SelectBuilder<T> {
      * @throws NoSuchFieldException
      * @throws ParseException
      */
-    public List<T> execute() throws InstantiationException, IllegalAccessException, NoSuchFieldException, ParseException {
+    public List<T> findAll() throws InstantiationException, IllegalAccessException, NoSuchFieldException, ParseException {
         List<T> results = new ArrayList<>();
 
         // 执行查询
@@ -125,5 +125,31 @@ public class SelectBuilder<T> {
             }
         }
         return results;
+    }
+
+    /**
+     * 执行查询操作，获取查询结果集的第一个
+     *
+     * @return 查询结果集的第一个，null则查询不到
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws NoSuchFieldException
+     * @throws ParseException
+     */
+    public T findFirst() throws InstantiationException, IllegalAccessException, NoSuchFieldException, ParseException {
+        T result = null;
+
+        // 执行查询
+        Cursor cursor = executeNative();
+        if (cursor != null) {
+            try {
+                if (cursor.moveToNext()) {
+                    result = ObjectUtil.buildObject(objectClass, cursor);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        return result;
     }
 }

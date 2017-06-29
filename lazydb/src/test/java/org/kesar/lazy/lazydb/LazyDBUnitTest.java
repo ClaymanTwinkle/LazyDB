@@ -21,22 +21,19 @@ import java.util.UUID;
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = "src/main/AndroidManifest.xml", sdk = 16)
-public class LazyDBUnitTest
-{
+public class LazyDBUnitTest {
     LazyDB lazyDB;
     long start_time;
 
     @Before
-    public void setUp()
-    {
+    public void setUp() {
         Application application = RuntimeEnvironment.application;
         lazyDB = LazyDB.create(application);
         start_time = System.currentTimeMillis();
     }
 
     @Test
-    public void testAll() throws Exception
-    {
+    public void testAll() throws Exception {
         createTable();
         queryAllTableNames();
         dropTable();
@@ -51,31 +48,27 @@ public class LazyDBUnitTest
     }
 
     @Test
-    public void createTable() throws Exception
-    {
+    public void createTable() throws Exception {
         lazyDB.createTable(Entity.class);
         boolean result = lazyDB.isTableExist(Entity.class);
         print(result ? "创建表成功" : "创建表失败");
     }
 
     @Test
-    public void queryAllTableNames() throws Exception
-    {
+    public void queryAllTableNames() throws Exception {
         List<String> list = lazyDB.queryAllTableNames();
         print("查询所有表：" + list.toString());
     }
 
     @Test
-    public void dropTable() throws Exception
-    {
+    public void dropTable() throws Exception {
         lazyDB.dropTable(Entity.class);
         boolean result = lazyDB.isTableExist(Entity.class);
         print(result ? "删除表失败" : "删除表成功");
     }
 
     @Test
-    public void insertObject() throws Exception
-    {
+    public void insertObject() throws Exception {
         Entity entity = createEntity();
         lazyDB.insert(entity);
         boolean result = lazyDB.isObjectExist(entity);
@@ -83,11 +76,9 @@ public class LazyDBUnitTest
     }
 
     @Test
-    public void insertManyObject() throws Exception
-    {
+    public void insertManyObject() throws Exception {
         List<Entity> entities = new ArrayList<>();
-        for (int i = 0; i < 100; i++)
-        {
+        for (int i = 0; i < 100; i++) {
             Entity entity = createEntity();
             entities.add(entity);
         }
@@ -96,8 +87,7 @@ public class LazyDBUnitTest
     }
 
     @Test
-    public void updateObject() throws Exception
-    {
+    public void updateObject() throws Exception {
         Entity entity = createEntity();
         lazyDB.insert(entity);
         queryAllObject();
@@ -110,8 +100,7 @@ public class LazyDBUnitTest
     }
 
     @Test
-    public void insertOrUpdateObject() throws Exception
-    {
+    public void insertOrUpdateObject() throws Exception {
         Entity entity = createEntity();
         lazyDB.insertOrUpdate(entity);
         queryAllObject();
@@ -124,8 +113,7 @@ public class LazyDBUnitTest
     }
 
     @Test
-    public void deleteObject() throws Exception
-    {
+    public void deleteObject() throws Exception {
         Entity entity = createEntity();
         lazyDB.insert(entity);
         queryAllObject();
@@ -134,60 +122,52 @@ public class LazyDBUnitTest
     }
 
     @Test
-    public void deleteAllObject() throws Exception
-    {
+    public void deleteAllObject() throws Exception {
         insertManyObject();
         lazyDB.delete(Entity.class, null, null);
         queryAllObject();
     }
 
     @Test
-    public void queryObject() throws Exception
-    {
+    public void queryObject() throws Exception {
         Entity entity = createEntity();
         lazyDB.insert(entity);
         List<Entity> entities = lazyDB
                 .query(Entity.class)
                 .selectAll()
-                .where("id=? and name=? and age=? and birthday=? and sex=? and money=?"
-                        , new String[]{
-                                entity.getId(),
-                                entity.getName(),
-                                entity.getAge() + "",
-                                DateUtil.date2String(entity.getBirthday()),
-                                entity.isSex() ? "1" : "0",
-                                Double.toString(entity.getMoney())
-                        }
+                .where("id=? and name=? and age=? and birthday=? and sex=? and money=?",
+                        entity.getId(),
+                        entity.getName(),
+                        entity.getAge() + "",
+                        DateUtil.date2String(entity.getBirthday()),
+                        entity.isSex() ? "1" : "0",
+                        Double.toString(entity.getMoney())
                 )
-                .execute();
+                .findAll();
         print(entities.toString());
     }
 
     @Test
-    public void queryAllObject() throws Exception
-    {
-        List<Entity> entities = lazyDB.query(Entity.class).selectAll().execute();
+    public void queryAllObject() throws Exception {
+        List<Entity> entities = lazyDB.query(Entity.class).selectAll().findAll();
         print(entities.toString());
     }
 
     @Test
-    public void queryById() throws Exception
-    {
-        Entity entity=createEntity();
+    public void queryById() throws Exception {
+        Entity entity = createEntity();
         lazyDB.insert(entity);
-        lazyDB.queryById(entity.getClass(),entity.getId());
+        lazyDB.queryById(entity.getClass(), entity.getId());
     }
 
     @After
-    public void setDown()
-    {
+    public void setDown() {
         double cost_time = System.currentTimeMillis() - start_time;
         print("========================================================");
         print("耗时：" + cost_time + "ms");
     }
 
-    private Entity createEntity()
-    {
+    private Entity createEntity() {
         Entity entity = new Entity();
         entity.setId(UUID.randomUUID().toString());
         entity.setAge(88);
@@ -198,8 +178,7 @@ public class LazyDBUnitTest
         return entity;
     }
 
-    public void print(String s)
-    {
+    public void print(String s) {
         System.err.println(s);
     }
 }

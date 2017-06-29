@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import org.kesar.lazy.lazydb.config.DeBugLogger;
 import org.kesar.lazy.lazydb.domain.ColumnInfo;
 import org.kesar.lazy.lazydb.domain.KeyValue;
+import org.kesar.lazy.lazydb.util.IDUtil;
 import org.kesar.lazy.lazydb.util.ObjectUtil;
 import org.kesar.lazy.lazydb.util.TableUtil;
 
@@ -29,12 +30,13 @@ public final class SQLiteDBExecutor {
         this.helper = helper;
     }
 
-    public void createTable(String sql) {
-        SQLiteDatabase db = helper.getWritableDatabase();
-        db.execSQL(sql);
-    }
-
-    public void dropTable(final String sql) throws Exception {
+    /**
+     * 执行SQL，非查询操作
+     *
+     * @param sql SQL语句
+     * @throws Exception
+     */
+    public void execSQL(final String sql) throws Exception {
         executeTransaction(new NoQueryOperation() {
             @Override
             public void onOperation(SQLiteDatabase db) throws Exception {
@@ -132,7 +134,7 @@ public final class SQLiteDBExecutor {
             @Override
             public void onOperation(SQLiteDatabase db) throws Exception {
                 // 根据id更新object
-                KeyValue idColumn = TableUtil.getIDColumn(object);
+                KeyValue idColumn = IDUtil.getIDColumn(object);
                 if (null == idColumn) {
                     throw new IllegalStateException("Object does not include the id field");
                 }
@@ -153,7 +155,7 @@ public final class SQLiteDBExecutor {
         executeTransaction(new NoQueryOperation() {
             @Override
             public void onOperation(SQLiteDatabase db) throws Exception {
-                KeyValue column = TableUtil.getIDColumn(object);
+                KeyValue column = IDUtil.getIDColumn(object);
                 if (null == column) {
                     throw new IllegalStateException("Object does not include the id field");
                 }
@@ -175,7 +177,7 @@ public final class SQLiteDBExecutor {
             @Override
             public void onOperation(SQLiteDatabase db) throws Exception {
                 for (Object object : objectList) {
-                    KeyValue column = TableUtil.getIDColumn(object);
+                    KeyValue column = IDUtil.getIDColumn(object);
                     if (null == column) {
                         throw new IllegalStateException("Object does not include the id field");
                     }

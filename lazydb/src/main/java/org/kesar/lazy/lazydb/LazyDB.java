@@ -13,6 +13,7 @@ import org.kesar.lazy.lazydb.core.SQLiteDBHelper;
 import org.kesar.lazy.lazydb.core.SelectBuilder;
 import org.kesar.lazy.lazydb.domain.ColumnInfo;
 import org.kesar.lazy.lazydb.domain.KeyValue;
+import org.kesar.lazy.lazydb.util.IDUtil;
 import org.kesar.lazy.lazydb.util.TableUtil;
 
 import java.text.ParseException;
@@ -66,9 +67,9 @@ public final class LazyDB {
      *
      * @param clazz 类
      */
-    public void createTable(Class<?> clazz) {
+    public void createTable(Class<?> clazz) throws Exception {
         String sql = SQLBuilder.buildCreateTableSql(clazz);
-        executor.createTable(sql);
+        executor.execSQL(sql);
     }
 
     /**
@@ -80,9 +81,9 @@ public final class LazyDB {
      * @param isAutoIncrement 是否自动增长
      * @param columns         其他列名，不包括id
      */
-    public void createTable(String tableName, String idColumn, String idDataType, boolean isAutoIncrement, String... columns) {
+    public void createTable(String tableName, String idColumn, String idDataType, boolean isAutoIncrement, String... columns) throws Exception {
         String sql = SQLBuilder.buildCreateTableSql(tableName, idColumn, idDataType, isAutoIncrement, columns);
-        executor.createTable(sql);
+        executor.execSQL(sql);
     }
 
 
@@ -93,7 +94,7 @@ public final class LazyDB {
      */
     public void dropTable(final Class<?> clazz) throws Exception {
         String sql = SQLBuilder.buildDropTableSql(clazz);
-        executor.dropTable(sql);
+        executor.execSQL(sql);
     }
 
     /**
@@ -161,7 +162,7 @@ public final class LazyDB {
         // 如果表存在
         Class<?> clazz = object.getClass();
         if (isTableExist(clazz)) {
-            KeyValue idColumn = TableUtil.getIDColumn(object);
+            KeyValue idColumn = IDUtil.getIDColumn(object);
             if (idColumn == null) {
                 return false;
             }
@@ -320,19 +321,16 @@ public final class LazyDB {
         T object = null;
         String tableName = TableUtil.getTableName(clazz);
         if (isTableExist(tableName)) {
-            String idName = TableUtil.getIdName(clazz);
+            String idName = IDUtil.getIdName(clazz);
             // 如果id不存在
             if (TextUtils.isEmpty(idName)) {
                 throw new IllegalStateException("object have to have a id column!");
             }
 
-            List<T> resultList = executor.query(clazz)
+            object = executor.query(clazz)
                     .selectAll()
                     .where(idName + "=?", new String[]{idValue.toString()})
-                    .execute();
-            if (!resultList.isEmpty()) {
-                object = resultList.get(0);
-            }
+                    .findFirst();
         }
         return object;
     }

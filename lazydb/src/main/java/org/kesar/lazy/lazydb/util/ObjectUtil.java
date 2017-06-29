@@ -30,12 +30,12 @@ public final class ObjectUtil {
                 continue;
             }
             String columnName = cursor.getColumnName(i);
-            Field field = objectClass.getDeclaredField(columnName);
+            Field field = ReflectUtil.getDeclaredField(objectClass, columnName);
             if (field == null) {
                 continue;
             }
             Class fieldClass = field.getType();
-            if(!field.isAccessible()){
+            if (!field.isAccessible()) {
                 field.setAccessible(true);
             }
             if (fieldClass == String.class) {
@@ -70,8 +70,7 @@ public final class ObjectUtil {
             } else if (fieldClass == Date.class) {
                 String value = cursor.getString(i);
                 field.set(object, DateUtil.string2Date(value));
-            }
-            else{
+            } else {
                 // TODO: 16-11-11 这里如果不是基本类型的话，可以拓展到其他对象的递归构建，所以这个方法将不能放在这个类中
             }
         }

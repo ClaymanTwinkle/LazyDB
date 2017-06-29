@@ -30,7 +30,9 @@ public final class SQLBuilder {
         StringBuilder sb = new StringBuilder();
 
         Field[] fields = ReflectUtil.getDeclaredFields(clazz);
-        checkClassFields(fields);
+        if (fields == null || fields.length == 0) {
+            throw new IllegalStateException("class'fields can not be empty");
+        }
 
         // 开头
         sb.append("create table ")
@@ -271,16 +273,5 @@ public final class SQLBuilder {
         return "PRAGMA table_info(" +
                 TableUtil.getTableName(clazz) +
                 ")";
-    }
-
-    /**
-     * 检查fields是否为空
-     *
-     * @param fields class fields
-     */
-    private static void checkClassFields(Field[] fields) {
-        if (fields == null || fields.length == 0) {
-            throw new IllegalStateException("class'fields can not be empty");
-        }
     }
 }
