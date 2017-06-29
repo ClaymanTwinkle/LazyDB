@@ -1,4 +1,4 @@
-package org.kesar.lazy.lazydb.util;
+package org.kesar.lazy.lazydb.core;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -10,7 +10,6 @@ import android.os.Build;
 
 import org.kesar.lazy.lazydb.builder.SqlBuilder;
 import org.kesar.lazy.lazydb.config.DBConfig;
-import org.kesar.lazy.lazydb.config.DBUpgradeListener;
 import org.kesar.lazy.lazydb.config.DeBugLogger;
 
 /**
@@ -18,7 +17,7 @@ import org.kesar.lazy.lazydb.config.DeBugLogger;
  * Created by kesar on 2016/6/21 0021.
  */
 public class SqliteDBHelper extends SQLiteOpenHelper {
-    private DBUpgradeListener mDbUpgradeListener;
+    private DBConfig.DBUpgradeListener mDbUpgradeListener;
 
     public SqliteDBHelper(DBConfig config) {
         super(config.getContext(), config.getDBName(), null, config.getDBVersion());

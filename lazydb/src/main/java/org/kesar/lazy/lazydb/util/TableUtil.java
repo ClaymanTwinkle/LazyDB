@@ -3,15 +3,12 @@ package org.kesar.lazy.lazydb.util;
 import android.content.ContentValues;
 
 import org.kesar.lazy.lazydb.annotate.ID;
+import org.kesar.lazy.lazydb.domain.DataType;
+import org.kesar.lazy.lazydb.domain.KeyValue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Date;
-
-import static android.R.attr.id;
-import static android.R.attr.name;
-import static android.R.attr.readPermission;
-import static android.R.attr.value;
 
 /**
  * 数据库表操作工具类
@@ -89,7 +86,7 @@ public final class TableUtil {
                 values.put(name, String.valueOf(value).getBytes());
             } else {
                 // 处理其他数据类型, 只能也用string了
-                values.put(name, String.valueOf(value));
+                values.put(name, value.toString());
             }
         }
         return values;
@@ -184,8 +181,11 @@ public final class TableUtil {
             return DataType.REAL;
         } else if (clazz == Date.class) {
             return DataType.DATE;
+        } else if (clazz == String.class) {
+            return DataType.TEXT;
+        } else {
+            return DataType.BLOB;
         }
-        return DataType.TEXT;
     }
 
     /**

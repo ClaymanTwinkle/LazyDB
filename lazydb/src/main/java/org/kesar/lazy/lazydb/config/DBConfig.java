@@ -1,6 +1,7 @@
 package org.kesar.lazy.lazydb.config;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 
 /**
  * 本地数据库的配置
@@ -105,5 +106,14 @@ public class DBConfig
     public static DBConfig getDefaultConfig(Context context)
     {
         return new DBConfig(context);
+    }
+
+    /**
+     * 数据库版本更新监听器
+     * Created by kesar on 2016/6/21 0021.
+     */
+    public interface DBUpgradeListener
+    {
+        void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion);
     }
 }

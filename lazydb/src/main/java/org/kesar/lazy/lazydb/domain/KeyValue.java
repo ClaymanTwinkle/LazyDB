@@ -1,4 +1,4 @@
-package org.kesar.lazy.lazydb.util;
+package org.kesar.lazy.lazydb.domain;
 
 /**
  * 属性

@@ -12,9 +12,9 @@ import org.kesar.lazy.lazydb.builder.SqlBuilder;
 import org.kesar.lazy.lazydb.config.DBConfig;
 import org.kesar.lazy.lazydb.config.DeBugLogger;
 import org.kesar.lazy.lazydb.domain.ColumnInfo;
-import org.kesar.lazy.lazydb.util.KeyValue;
+import org.kesar.lazy.lazydb.domain.KeyValue;
 import org.kesar.lazy.lazydb.util.ObjectUtil;
-import org.kesar.lazy.lazydb.util.SqliteDBHelper;
+import org.kesar.lazy.lazydb.core.SqliteDBHelper;
 import org.kesar.lazy.lazydb.util.TableUtil;
 
 import java.text.ParseException;

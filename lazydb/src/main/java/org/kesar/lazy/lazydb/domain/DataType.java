@@ -1,6 +1,7 @@
-package org.kesar.lazy.lazydb.util;
+package org.kesar.lazy.lazydb.domain;
 
 /**
+ * SQLite数据类型
  * Created by kesar on 2016/6/21 0021.
  */
 public enum DataType
@@ -21,5 +22,5 @@ public enum DataType
 
     DATE,//包含了 年份、月份、日期。
 
-    TIME;//包含了 小时、分钟、秒。
+    TIME //包含了 小时、分钟、秒。
 }

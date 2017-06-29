@@ -4,15 +4,13 @@ import android.text.TextUtils;
 
 import org.kesar.lazy.lazydb.annotate.ID;
 import org.kesar.lazy.lazydb.config.DeBugLogger;
-import org.kesar.lazy.lazydb.util.DataType;
+import org.kesar.lazy.lazydb.domain.DataType;
 import org.kesar.lazy.lazydb.util.IDUtil;
 import org.kesar.lazy.lazydb.util.ReflectUtil;
 import org.kesar.lazy.lazydb.util.TableUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-
-import static android.R.attr.id;
 
 /**
  * sql语句生成
