@@ -50,12 +50,6 @@ public class SelectBuilder<T> {
         return this;
     }
 
-    /**
-     * [ORDER BY column1, column2, .. columnN] [ASC | DESC];
-     *
-     * @param orderBy column1 [ASC | DESC], column2 [ASC | DESC],
-     * @return SelectBuilder
-     */
     public SelectBuilder<T> orderBy(String orderBy) {
         this.orderBy = orderBy;
         return this;
