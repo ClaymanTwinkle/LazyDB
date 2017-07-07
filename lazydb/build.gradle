@@ -23,12 +23,12 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:25.3.1'
+    provided 'com.android.support:appcompat-v7:25.3.1'
     testCompile 'org.robolectric:robolectric:3.1'
 }
 
 
-version = "1.0.8"
+version = "1.0.9"
 def siteUrl = 'https://github.com/ClaymanTwinkle/LazyDB'
 def gitUrl = 'https://github.com/ClaymanTwinkle/LazyDB.git'
 group = "com.kesar"
