@@ -67,7 +67,7 @@ public class IDUtil {
      *
      * @param objectClass 类
      * @return id String
-     * @throws IllegalAccessException
+     * @throws IllegalAccessException IllegalAccessException
      */
     public static String getIdName(Class objectClass) throws IllegalAccessException {
         String name = null;
@@ -87,7 +87,7 @@ public class IDUtil {
      *
      * @param object 对象
      * @return 属性（名字和值）
-     * @throws IllegalAccessException
+     * @throws IllegalAccessException IllegalAccessException
      */
     public static KeyValue getIDColumn(Object object) throws IllegalAccessException {
         Class objectClass = object.getClass();

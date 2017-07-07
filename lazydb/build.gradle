@@ -28,7 +28,7 @@ dependencies {
 }
 
 
-version = "1.0.3"
+version = "1.0.6"
 def siteUrl = 'https://github.com/ClaymanTwinkle/LazyDB'
 def gitUrl = 'https://github.com/ClaymanTwinkle/LazyDB.git'
 group = "com.kesar"
@@ -69,9 +69,16 @@ task sourcesJar(type: Jar) {
     classifier = 'sources'
 }
 
+
+
 task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    failOnError false
+    options{
+        encoding "UTF-8"
+        charSet 'UTF-8'
+    }
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {

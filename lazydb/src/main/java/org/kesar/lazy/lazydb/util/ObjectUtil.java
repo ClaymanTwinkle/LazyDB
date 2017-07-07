@@ -17,10 +17,10 @@ public final class ObjectUtil {
      * @param objectClass 对象类
      * @param cursor      游标
      * @return 填充数据后的对象
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws NoSuchFieldException
-     * @throws ParseException
+     * @throws InstantiationException InstantiationException
+     * @throws IllegalAccessException IllegalAccessException
+     * @throws NoSuchFieldException NoSuchFieldException
+     * @throws ParseException NoSuchFieldException
      */
     public static <T> T buildObject(Class<T> objectClass, Cursor cursor) throws InstantiationException, IllegalAccessException, NoSuchFieldException, ParseException {
         T object = ReflectUtil.newInstance(objectClass);
