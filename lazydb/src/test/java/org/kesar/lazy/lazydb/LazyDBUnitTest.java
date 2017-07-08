@@ -6,12 +6,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kesar.lazy.lazydb.util.DateUtil;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -20,7 +23,7 @@ import java.util.UUID;
  * To work on unit tests, switch the Test Artifact in the Build Variants view.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = "src/main/AndroidManifest.xml", sdk = 16)
+@Config(manifest = "/src/main/AndroidManifest.xml", sdk = 16)
 public class LazyDBUnitTest {
     LazyDB lazyDB;
     long start_time;
@@ -30,6 +33,32 @@ public class LazyDBUnitTest {
         Application application = RuntimeEnvironment.application;
         lazyDB = LazyDB.create(application);
         start_time = System.currentTimeMillis();
+    }
+
+    @Test
+    public void testEmpty() {
+        System.err.println("test");
+    }
+
+    @Test
+    public void test() {
+        Field[] fields = Entity.class.getDeclaredFields();
+
+        for (Field f : fields) {
+            f.setAccessible(true);
+            if (f.getType() == java.util.List.class) {
+                // 如果是List类型，得到其Generic的类型
+                Type genericType = f.getGenericType();
+                if (genericType == null) continue;
+                // 如果是泛型参数的类型
+                if (genericType instanceof ParameterizedType) {
+                    ParameterizedType pt = (ParameterizedType) genericType;
+                    //得到泛型里的class类型对象
+                    Class<?> genericClazz = (Class<?>) pt.getActualTypeArguments()[0];
+                    System.err.println(genericClazz.getName());
+                }
+            }
+        }
     }
 
     @Test
@@ -139,7 +168,7 @@ public class LazyDBUnitTest {
                         entity.getId(),
                         entity.getName(),
                         entity.getAge() + "",
-                        DateUtil.date2String(entity.getBirthday()),
+                        String.valueOf(entity.getBirthday().getTime()),
                         entity.isSex() ? "1" : "0",
                         Double.toString(entity.getMoney())
                 )
@@ -175,6 +204,7 @@ public class LazyDBUnitTest {
         entity.setMoney(66.66);
         entity.setName("哈哈");
         entity.setSex(false);
+        entity.setImgList(Arrays.asList(new Date(),new Date(),new Date()));
         return entity;
     }
 

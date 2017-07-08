@@ -57,9 +57,6 @@ public final class TableUtil {
 
             if (value instanceof String) {
                 values.put(name, String.valueOf(value));
-            } else if (value instanceof Date) {
-                String dateString = DateUtil.date2String((Date) value);
-                values.put(name, dateString);
             } else if (value instanceof Double
                     || value.getClass() == double.class) {
                 values.put(name, Double.valueOf(String.valueOf(value)));
@@ -83,9 +80,10 @@ public final class TableUtil {
                 values.put(name, Boolean.valueOf(String.valueOf(value)));
             } else if (value instanceof byte[]) {
                 values.put(name, String.valueOf(value).getBytes());
+            } else if (value instanceof Date) {
+                values.put(name, ((Date) value).getTime());
             } else {
-                // 处理其他数据类型, 只能也用string了
-                values.put(name, value.toString());
+                values.put(name, ObjectUtil.object2Byte(value));
             }
         }
         return values;
@@ -119,9 +117,6 @@ public final class TableUtil {
             String name = field.getName();
             if (value instanceof String) {
                 values.put(name, String.valueOf(value));
-            } else if (value instanceof Date) {
-                String dateString = DateUtil.date2String((Date) value);
-                values.put(name, dateString);
             } else if (value instanceof Double
                     || value.getClass() == double.class) {
                 values.put(name, Double.valueOf(String.valueOf(value)));
@@ -145,9 +140,10 @@ public final class TableUtil {
                 values.put(name, Boolean.valueOf(String.valueOf(value)));
             } else if (value instanceof byte[]) {
                 values.put(name, String.valueOf(value).getBytes());
+            } else if (value instanceof Date) {
+                values.put(name, ((Date) value).getTime());
             } else {
-                // 处理其他数据类型, 只能也用string了
-                values.put(name, String.valueOf(value));
+                values.put(name, ObjectUtil.object2Byte(value));
             }
         }
         return values;
@@ -170,6 +166,7 @@ public final class TableUtil {
                 || clazz == Long.class
                 || clazz == Boolean.class
                 || clazz == boolean.class
+                || clazz == Date.class
                 ) {
             return DataType.INTEGER;
         } else if (clazz == float.class
@@ -178,8 +175,6 @@ public final class TableUtil {
                 || clazz == Double.class
                 ) {
             return DataType.REAL;
-        } else if (clazz == Date.class) {
-            return DataType.DATE;
         } else if (clazz == String.class) {
             return DataType.TEXT;
         } else {

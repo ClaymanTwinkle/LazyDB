@@ -5,6 +5,7 @@ import org.kesar.lazy.lazydb.annotate.ID;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by kesar on 2016/6/21 0021.
@@ -18,6 +19,7 @@ public class Entity implements Serializable
     private int age;
     private double money;
     private Date birthday;
+    private List<Date> imgList;
 
     public String getId()
     {
@@ -79,14 +81,24 @@ public class Entity implements Serializable
         this.name = name;
     }
 
+    public List<Date> getImgList() {
+        return imgList;
+    }
+
+    public void setImgList(List<Date> imgList) {
+        this.imgList = imgList;
+    }
+
     @Override
-    public String toString()
-    {
-        return "User{" +
-                "age=" + age +
+    public String toString() {
+        return "Entity{" +
+                "id='" + id + '\'' +
                 ", name='" + name + '\'' +
+                ", sex=" + sex +
+                ", age=" + age +
                 ", money=" + money +
                 ", birthday=" + birthday +
+                ", imgList=" + imgList +
                 '}';
     }
 }

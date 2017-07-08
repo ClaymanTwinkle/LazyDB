@@ -2,6 +2,11 @@ package org.kesar.lazy.lazydb.util;
 
 import android.database.Cursor;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.util.Date;
@@ -19,8 +24,8 @@ public final class ObjectUtil {
      * @return 填充数据后的对象
      * @throws InstantiationException InstantiationException
      * @throws IllegalAccessException IllegalAccessException
-     * @throws NoSuchFieldException NoSuchFieldException
-     * @throws ParseException NoSuchFieldException
+     * @throws NoSuchFieldException   NoSuchFieldException
+     * @throws ParseException         NoSuchFieldException
      */
     public static <T> T buildObject(Class<T> objectClass, Cursor cursor) throws InstantiationException, IllegalAccessException, NoSuchFieldException, ParseException {
         T object = ReflectUtil.newInstance(objectClass);
@@ -55,7 +60,11 @@ public final class ObjectUtil {
             } else if (fieldClass == byte.class
                     || fieldClass == Byte.class) {
                 String value = cursor.getString(i);
-                field.setByte(object, Byte.parseByte(value));
+                try {
+                    field.setByte(object, Byte.parseByte(value));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
             } else if (fieldClass == Short.class
                     || fieldClass == short.class) {
                 short value = cursor.getShort(i);
@@ -68,12 +77,59 @@ public final class ObjectUtil {
                 int value = cursor.getInt(i);
                 field.setBoolean(object, value != 0);
             } else if (fieldClass == Date.class) {
-                String value = cursor.getString(i);
-                field.set(object, DateUtil.string2Date(value));
+                long value = cursor.getLong(i);
+                field.set(object, new Date(value));
             } else {
-                // TODO: 16-11-11 这里如果不是基本类型的话，可以拓展到其他对象的递归构建，所以这个方法将不能放在这个类中
+                byte[] value = cursor.getBlob(i);
+                field.set(object, byte2Object(value));
             }
         }
         return object;
+    }
+
+
+    public static byte[] object2Byte(Object object) {
+        ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream = null;
+        try {
+            objectOutputStream = new ObjectOutputStream(arrayOutputStream);
+            objectOutputStream.writeObject(object);
+            objectOutputStream.flush();
+            return arrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (objectOutputStream != null) {
+                    objectOutputStream.close();
+                }
+                arrayOutputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public static Object byte2Object(byte[] data) {
+        ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(data);
+        ObjectInputStream inputStream = null;
+        try {
+            inputStream = new ObjectInputStream(arrayInputStream);
+            return inputStream.readObject();
+
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                arrayInputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }
