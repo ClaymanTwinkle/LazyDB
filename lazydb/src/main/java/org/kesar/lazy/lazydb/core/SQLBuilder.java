@@ -5,12 +5,13 @@ import android.text.TextUtils;
 import org.kesar.lazy.lazydb.annotate.ID;
 import org.kesar.lazy.lazydb.config.DeBugLogger;
 import org.kesar.lazy.lazydb.domain.DataType;
-import org.kesar.lazy.lazydb.util.IDUtil;
+import org.kesar.lazy.lazydb.util.FieldUtil;
 import org.kesar.lazy.lazydb.util.ReflectUtil;
 import org.kesar.lazy.lazydb.util.TableUtil;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+
+import static org.kesar.lazy.lazydb.util.FieldUtil.isIgnoreField;
 
 /**
  * sql语句生成
@@ -39,7 +40,7 @@ public final class SQLBuilder {
                 .append(TableUtil.getTableName(clazz)) // tableName
                 .append("(");
         // 找到主键
-        Field idField = IDUtil.getIDField(fields);
+        Field idField = FieldUtil.getIDField(fields);
         if (idField != null) {
             String idColumn = idField.getName();
             ID id = idField.getAnnotation(ID.class);
@@ -47,7 +48,7 @@ public final class SQLBuilder {
             if (id != null && !"".equals(id.column())) {
                 idColumn = id.column();
             }
-            DataType dataType = TableUtil.getDataType(idField.getType());
+            DataType dataType = FieldUtil.getDataType(idField.getType());
             sb.append(idColumn)
                     .append(" ")
                     .append(dataType.toString())
@@ -55,14 +56,14 @@ public final class SQLBuilder {
                     .append(",");
         }
         for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {// 移除是final和static的字段
+            if (isIgnoreField(field)) {
                 continue;
             }
             // 让不是id的field进来
             if (field != idField) {
                 sb.append(field.getName())
                         .append(" ")
-                        .append(TableUtil.getDataType(field.getType()))
+                        .append(FieldUtil.getDataType(field.getType()))
                         .append(",");
             }
         }

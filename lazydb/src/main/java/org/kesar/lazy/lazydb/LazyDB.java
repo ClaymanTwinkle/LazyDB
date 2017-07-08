@@ -13,7 +13,7 @@ import org.kesar.lazy.lazydb.core.SQLiteDBHelper;
 import org.kesar.lazy.lazydb.core.SelectBuilder;
 import org.kesar.lazy.lazydb.domain.ColumnInfo;
 import org.kesar.lazy.lazydb.domain.KeyValue;
-import org.kesar.lazy.lazydb.util.IDUtil;
+import org.kesar.lazy.lazydb.util.FieldUtil;
 import org.kesar.lazy.lazydb.util.TableUtil;
 
 import java.text.ParseException;
@@ -162,7 +162,7 @@ public final class LazyDB {
         // 如果表存在
         Class<?> clazz = object.getClass();
         if (isTableExist(clazz)) {
-            KeyValue idColumn = IDUtil.getIDColumn(object);
+            KeyValue idColumn = FieldUtil.getIDColumn(object);
             if (idColumn == null) {
                 return false;
             }
@@ -321,7 +321,7 @@ public final class LazyDB {
         T object = null;
         String tableName = TableUtil.getTableName(clazz);
         if (isTableExist(tableName)) {
-            String idName = IDUtil.getIdName(clazz);
+            String idName = FieldUtil.getIdName(clazz);
             // 如果id不存在
             if (TextUtils.isEmpty(idName)) {
                 throw new IllegalStateException("object have to have a id column!");

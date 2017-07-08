@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
 import org.kesar.lazy.lazydb.config.DeBugLogger;
 import org.kesar.lazy.lazydb.domain.ColumnInfo;
 import org.kesar.lazy.lazydb.domain.KeyValue;
-import org.kesar.lazy.lazydb.util.IDUtil;
+import org.kesar.lazy.lazydb.util.FieldUtil;
 import org.kesar.lazy.lazydb.util.ObjectUtil;
 import org.kesar.lazy.lazydb.util.TableUtil;
 
@@ -106,7 +106,7 @@ public final class SQLiteDBExecutor {
 
     public void insert(final Object object) throws Exception {
         final String table = TableUtil.getTableName(object);
-        final ContentValues values = TableUtil.getContentValues(object);
+        final ContentValues values = FieldUtil.getContentValues(object);
         // 插入表
         executeTransaction(new NoQueryOperation() {
             @Override
@@ -122,7 +122,7 @@ public final class SQLiteDBExecutor {
             public void onOperation(SQLiteDatabase db) throws Exception {
                 for (Object object : objectList) {
                     final String table = TableUtil.getTableName(object);
-                    final ContentValues values = TableUtil.getContentValues(object);
+                    final ContentValues values = FieldUtil.getContentValues(object);
                     db.insert(table, null, values);
                 }
             }
@@ -134,7 +134,7 @@ public final class SQLiteDBExecutor {
             @Override
             public void onOperation(SQLiteDatabase db) throws Exception {
                 // 根据id更新object
-                KeyValue idColumn = IDUtil.getIDColumn(object);
+                KeyValue idColumn = FieldUtil.getIDColumn(object);
                 if (null == idColumn) {
                     throw new IllegalStateException("Object does not include the id field");
                 }
@@ -142,7 +142,7 @@ public final class SQLiteDBExecutor {
                     throw new IllegalStateException("The value of the id field cannot be null");
                 }
                 String tableName = TableUtil.getTableName(object);
-                ContentValues values = TableUtil.getContentValuesWithOutID(object);
+                ContentValues values = FieldUtil.getContentValuesWithOutID(object);
                 String whereClause = idColumn.getKey() + "=?";
                 String[] whereArgs = new String[]{idColumn.getValue().toString()};
 
@@ -155,7 +155,7 @@ public final class SQLiteDBExecutor {
         executeTransaction(new NoQueryOperation() {
             @Override
             public void onOperation(SQLiteDatabase db) throws Exception {
-                KeyValue column = IDUtil.getIDColumn(object);
+                KeyValue column = FieldUtil.getIDColumn(object);
                 if (null == column) {
                     throw new IllegalStateException("Object does not include the id field");
                 }
@@ -177,7 +177,7 @@ public final class SQLiteDBExecutor {
             @Override
             public void onOperation(SQLiteDatabase db) throws Exception {
                 for (Object object : objectList) {
-                    KeyValue column = IDUtil.getIDColumn(object);
+                    KeyValue column = FieldUtil.getIDColumn(object);
                     if (null == column) {
                         throw new IllegalStateException("Object does not include the id field");
                     }
