@@ -29,7 +29,7 @@ dependencies {
     compile 'com.android.support:design:24.2.1'
     testCompile 'junit:junit:4.12'
     //compile project(':lazydb')
-    compile 'com.kesar:lazydb:1.0.9'
+    compile 'com.kesar:lazydb:1.1.0'
     compile 'com.jakewharton:butterknife:8.4.0'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
     compile 'com.android.support:cardview-v7:24.2.1'
