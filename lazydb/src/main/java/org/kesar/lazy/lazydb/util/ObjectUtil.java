@@ -47,35 +47,36 @@ public final class ObjectUtil {
                 field.set(object, cursor.getString(i));
             } else if (fieldClass == double.class
                     || fieldClass == Double.class) {
-                field.setDouble(object, cursor.getDouble(i));
+                field.set(object, cursor.getDouble(i));
             } else if (fieldClass == float.class
                     || fieldClass == Float.class) {
-                field.setFloat(object, cursor.getFloat(i));
+                field.set(object, cursor.getFloat(i));
             } else if (fieldClass == Long.class
                     || fieldClass == long.class) {
-                field.setLong(object, cursor.getLong(i));
+                field.set(object, cursor.getLong(i));
             } else if (fieldClass == Integer.class
                     || fieldClass == int.class) {
-                field.setInt(object, cursor.getInt(i));
+                field.set(object, cursor.getInt(i));
             } else if (fieldClass == byte.class
                     || fieldClass == Byte.class) {
                 String value = cursor.getString(i);
                 try {
-                    field.setByte(object, Byte.parseByte(value));
+                    field.set(object, Byte.parseByte(value));
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
             } else if (fieldClass == Short.class
                     || fieldClass == short.class) {
                 short value = cursor.getShort(i);
-                field.setShort(object, value);
+                field.set(object, value);
             } else if (fieldClass == byte[].class) {
                 byte[] value = cursor.getBlob(i);
                 field.set(object, value);
             } else if (fieldClass == Boolean.class
                     || fieldClass == boolean.class) {
                 int value = cursor.getInt(i);
-                field.setBoolean(object, value != 0);
+                boolean bValue = value != 0;
+                field.set(object, bValue);
             } else if (fieldClass == Date.class) {
                 long value = cursor.getLong(i);
                 field.set(object, new Date(value));
