@@ -28,7 +28,7 @@ dependencies {
 }
 
 
-version = "1.1.0"
+version = "1.1.1"
 def siteUrl = 'https://github.com/ClaymanTwinkle/LazyDB'
 def gitUrl = 'https://github.com/ClaymanTwinkle/LazyDB.git'
 group = "com.kesar"
