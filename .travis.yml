@@ -1,0 +1,18 @@
+language: android
+sudo: false
+android:
+  components:
+  - build-tools-24.0.3
+  - android-24
+  - extra
+  # Additional components
+  - extra-google-google_play_services
+  - extra-google-m2repository
+  - extra-android-m2repository
+  - addon-google_apis-google-19
+  # Specify at least one system image,
+  # if you need to run emulator(s) during your tests
+  - sys-img-armeabi-v7a-android-19
+  - sys-img-x86-android-17
+script:
+- ./gradlew :app:assembleRelease
