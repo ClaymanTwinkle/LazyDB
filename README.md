@@ -1,4 +1,8 @@
 # LazyDB
+
+[![Build Status](https://travis-ci.org/ClaymanTwinkle/LazyDB.svg?branch=master)](https://travis-ci.org/ClaymanTwinkle/LazyDB)
+[![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+
 一款简易使用的orm框架
 
 # 1. 框架设计
